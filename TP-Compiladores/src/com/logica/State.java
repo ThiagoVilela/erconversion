@@ -10,7 +10,9 @@ public class State {
 	private ArrayList<String> transition = new ArrayList<String>();
 	private ArrayList<State> nextState = new ArrayList<State>();
 	private boolean chainStart;
-	
+	private boolean unionStart = false;
+	private boolean unionEnd = false;
+
 	/* Construtores */
 	public State() {
 		super();
@@ -156,5 +158,19 @@ public class State {
 	}
 	public void setChainStart(boolean chainStart) {
 		this.chainStart = chainStart;
+	}
+	public boolean isUnionStart() {
+		return unionStart;
+	}
+	public void setUnionStart(boolean unionStart) {
+		this.unionStart = unionStart;
+	}
+
+	public boolean isUnionEnd() {
+		return unionEnd;
+	}
+
+	public void setUnionEnd(boolean unionEnd) {
+		this.unionEnd = unionEnd;
 	}
 }
