@@ -125,6 +125,14 @@ public class State {
 	public void addItemtoChange(String item) {
 		this.getItemToChange().add(item);
 	}
+	public ArrayList<String> getTransition() {
+		return transition;
+	}
+
+	public void setTransition(ArrayList<String> transition) {
+		this.transition = transition;
+	}
+
 	public void setItemToChange(ArrayList<String> itemToChange) {
 		this.transition = itemToChange;
 	}
