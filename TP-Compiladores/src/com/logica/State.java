@@ -9,7 +9,10 @@ public class State {
 	private boolean isFinal;
 	private ArrayList<String> transition = new ArrayList<String>();
 	private ArrayList<State> nextState = new ArrayList<State>();
-	private boolean chainStart;
+	
+	private boolean chainStart = false;
+	private boolean chainEnd = false;
+
 	private boolean unionStart = false;
 	private boolean unionEnd = false;
 
@@ -165,12 +168,17 @@ public class State {
 	public void setUnionStart(boolean unionStart) {
 		this.unionStart = unionStart;
 	}
-
 	public boolean isUnionEnd() {
 		return unionEnd;
 	}
-
 	public void setUnionEnd(boolean unionEnd) {
 		this.unionEnd = unionEnd;
+	}
+	public boolean isChainEnd() {
+		return chainEnd;
+	}
+
+	public void setChainEnd(boolean chainEnd) {
+		this.chainEnd = chainEnd;
 	}
 }

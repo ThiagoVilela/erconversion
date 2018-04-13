@@ -10,6 +10,7 @@ public class ConversionER {
 	
 	public static void main(String[] args) {
 		ConversionER conversion = new ConversionER();
+		ConversionER aux = new ConversionER();
 		
 		State nextState = new State();
 		State newState = new State();
@@ -21,16 +22,31 @@ public class ConversionER {
 		in.close();
 		/* Fim Teste de entrada via teclado */
 		
+		/* Talvez dê pala com mais parênteses */
+		conversion.statesList = new ArrayList<State>();
+		conversion = aux.logicFunction(aux, expression);
+
+		System.out.println();
+		for (int i = 0; i < conversion.statesList.size(); i++) {
+			conversion.statesList.get(i).printState();
+		}
+	}
+	
+	public ConversionER logicFunction(ConversionER mainList, String expression) {
+		State nextState = new State();
+		State newState = new State();
+		Read reader = new Read();
+		
 		for (int i = 0; i < expression.length(); i++) {
 			if (reader.isLetterLower(expression.charAt(i))) {
-				if (conversion.statesList.size() == 0) {
+				if (mainList.statesList.size() == 0) {
 					nextState = new State((i+1),
 										false,
-										conversion.isFinal(i, expression.length())
+										mainList.isFinal(i, expression.length())
 										);
 					
 					newState = new State(i,
-										conversion.isInitial(conversion.statesList.size()),
+										mainList.isInitial(mainList.statesList.size()),
 										false, 
 										Character.toString(expression.charAt(i)), 
 										nextState
@@ -42,101 +58,100 @@ public class ConversionER {
 						}
 					}
 					
-					conversion.statesList.add(newState);
-					
-				}else if(expression.charAt(i-1) == '*') {
-					nextState = new State(conversion.statesList.size(),
+					mainList.statesList.add(newState);
+				}
+				
+				else if(expression.charAt(i-1) == '*') {
+					nextState = new State(mainList.statesList.size(),
 											false,
-											conversion.isFinal(i, expression.length())
+											mainList.isFinal(i, expression.length())
 											);
-					conversion.statesList.get(conversion.statesList.size()-1).addItemtoChange(Character.toString(expression.charAt(i)));
-					conversion.statesList.get(conversion.statesList.size()-1).addNextState(nextState);
+					mainList.statesList.get(mainList.statesList.size()-1).addItemtoChange(Character.toString(expression.charAt(i)));
+					mainList.statesList.get(mainList.statesList.size()-1).addNextState(nextState);
 					
 					if(reader.validNext(i, expression.length())) {
 						if(expression.charAt(i+1) == '*' || reader.isReservedWord(expression.charAt(i+1))) {
-							conversion.statesList.get(conversion.statesList.size()-1).setChainStart(true);
+							mainList.statesList.get(mainList.statesList.size()-1).setChainStart(true);
 						}
 					}
 					
 				}
 				
 				else if(expression.charAt(i-1) == 'U') {
-					nextState = new State(conversion.statesList.size()+1,
+					nextState = new State(mainList.statesList.size()+1,
 										false,
-										conversion.isFinal(i, expression.length())
+										mainList.isFinal(i, expression.length())
 										);
 					
-					newState = new State(conversion.statesList.size(),
-										conversion.isInitial(conversion.statesList.size()),
+					newState = new State(mainList.statesList.size(),
+										mainList.isInitial(mainList.statesList.size()),
 										false, 
 										Character.toString(expression.charAt(i)), 
 										nextState
 										);
 					
-					conversion.statesList.add(newState);
+					mainList.statesList.add(newState);
 					
-					for (int j = conversion.statesList.size()-1; j >= 0; j--) {
-						if(conversion.statesList.get(j).isUnionStart()) {
-							nextState = new State(conversion.statesList.size()-1,
+					for (int j = mainList.statesList.size()-1; j >= 0; j--) {
+						if(mainList.statesList.get(j).isUnionStart()) {
+							nextState = new State(mainList.statesList.size()-1,
 													false,
-													conversion.isFinal(i, expression.length())
+													mainList.isFinal(i, expression.length())
 													);
 							
-							conversion.statesList.get(j).addItemtoChange("L");
-							conversion.statesList.get(j).addNextState(nextState);
+							mainList.statesList.get(j).addItemtoChange("L");
+							mainList.statesList.get(j).addNextState(nextState);
 							
 							j = -1;
 						}
 					}
 					
 					int unionEnd = -1;
-					for (int j = conversion.statesList.size()-1; j >= 0; j--) {
-						if(conversion.statesList.get(j).isUnionEnd()) {
+					for (int j = mainList.statesList.size()-1; j >= 0; j--) {
+						if(mainList.statesList.get(j).isUnionEnd()) {
 							unionEnd = j;
 							j = -1;
 						}
 					}
 					
-					nextState = new State(conversion.statesList.get(unionEnd).getName(),
+					nextState = new State(mainList.statesList.get(unionEnd).getName(),
 										false,
-										conversion.isFinal(i, expression.length())
+										mainList.isFinal(i, expression.length())
 										);
 					
-					newState = new State(conversion.statesList.size(),
-										conversion.isInitial(conversion.statesList.size()),
+					newState = new State(mainList.statesList.size(),
+										mainList.isInitial(mainList.statesList.size()),
 										false, 
 										"L", 
 										nextState
 										);
 					
-					conversion.statesList.add(newState);
+					mainList.statesList.add(newState);
 				}
 				
-				else if(conversion.statesList.size() > 0) {
+				else if(mainList.statesList.size() > 0) {
 					boolean hasUnion = false;
-					for (int j = conversion.statesList.size()-1; j >= 0; j--) {
-						if (conversion.statesList.get(j).isUnionEnd()) {
+					for (int j = mainList.statesList.size()-1; j >= 0; j--) {
+						if (mainList.statesList.get(j).isUnionEnd()) {
 							
-							conversion.statesList.get(j).setNextStateName(0, conversion.statesList.size());
-							conversion.statesList.get(j).getItemToChange().remove(0);
-							conversion.statesList.get(j).getItemToChange().add(Character.toString(expression.charAt(i)));
-							conversion.statesList.get(j).setUnionEnd(false);
+							mainList.statesList.get(j).setNextStateName(0, mainList.statesList.size());
+							mainList.statesList.get(j).getItemToChange().remove(0);
+							mainList.statesList.get(j).getItemToChange().add(Character.toString(expression.charAt(i)));
+							mainList.statesList.get(j).setUnionEnd(false);
 							
-							conversion.statesList.get(j).printState();
-							conversion.statesList.get(conversion.statesList.size()-1).printState();
 							hasUnion = true;
 							j = -1;
 						}
 					}
 					
 					if(!hasUnion) {
-						nextState = new State(conversion.statesList.size()+1,
+						nextState = new State(mainList.statesList.size()+1,
 											false,
-											conversion.isFinal(i, expression.length())
+											mainList.isFinal(i, expression.length())
 											);
 						
-						newState = new State(conversion.statesList.size(),
-											conversion.isInitial(conversion.statesList.size()),
+						newState = new State(mainList.statesList.size(),
+											mainList.isInitial(mainList.statesList.size()),
 											false,
 											Character.toString(expression.charAt(i)), 
 											nextState
@@ -148,7 +163,7 @@ public class ConversionER {
 							}
 						}
 						
-						conversion.statesList.add(newState);
+						mainList.statesList.add(newState);
 					}
 					
 				}
@@ -158,22 +173,42 @@ public class ConversionER {
 			}
 			
 			else if(expression.charAt(i) == '*') {
-				conversion = conversion.foundStarKey(conversion, i, expression);
+				mainList = mainList.foundStarKey(mainList, i, expression);
 			}
 			
 			else if(expression.charAt(i) == 'U') {
-				conversion = conversion.foundUnion(conversion, i, expression);
-				conversion.statesList.get(conversion.statesList.size()-1).printState();
+				mainList = mainList.foundUnion(mainList, i, expression);
+			}
+			
+			else if(expression.charAt(i) == '('){
+				
+				
+				ArrayList<State> transf = new ArrayList<State>();
+				
+				/* O Javinha está de brincadeira com a nossa cara - ele está salvando TODO O ROLE na porra do mainList que eu chamei SÓ PRA PASSAR PRO TRANSF */
+				/* Como a lógica nunca é realmente lógica - vamos deixar assim - caso de BUG NO MAINLIST volte aqui (: - Oremos. */
+				transf = mainList.logicFunction(mainList, expression.substring(i+1, expression.length())).statesList;
+					
+				//mainList.statesList.addAll(transf);
+
+				for (int k = i+1; k < expression.length(); k++) {
+					if (expression.charAt(k) == ')') {
+						i = k;
+						k = expression.length();
+					}
+				}
+			}
+			
+			else if(expression.charAt(i) == ')'){
+				return mainList;
 			}
 			
 			else {
 				System.out.println("Erro na criação do estado");
 			}
 		}
-		System.out.println();
-		for (int i = 0; i < conversion.statesList.size(); i++) {
-			conversion.statesList.get(i).printState();
-		}
+		
+		return mainList;
 	}
 	
 	public ConversionER foundUnion(ConversionER conversion, int i, String expression) {
