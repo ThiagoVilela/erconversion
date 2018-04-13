@@ -199,7 +199,8 @@ public class ConversionER {
 						auxStateList.get(j).setName(mainList.statesList.size()+j);
 						for (int j2 = 0; j2 < auxStateList.get(j).getNextState().size(); j2++) {
 							auxStateList.get(j).setNextStateName(j2, (auxStateList.get(j).getNextStateName(j2))+(mainList.statesList.size()));
-							
+							//System.out.println("DEU ERRO COM: " + "q"+mainList.statesList.get(mainList.statesList.size()-1).getNextState().get(j).getName() + " e q" + auxStateList.get(j2).getName() );
+							/* CONTINUAR DAQUI - O rolê de várias letras dentro do parentese com elementos de fora a(aaa) */
 							if(mainList.statesList.get(mainList.statesList.size()-1).getNextState().get(j).getName() == auxStateList.get(j2).getName()) {
 								oldLinksNew = true;
 							}
