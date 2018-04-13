@@ -61,12 +61,12 @@ public class ConversionER {
 				}
 				
 				else if(expression.charAt(i-1) == 'U') {
-					nextState = new State(conversion.statesList.size()+2,
+					nextState = new State(conversion.statesList.size()+1,
 										false,
 										conversion.isFinal(i, expression.length())
 										);
 					
-					newState = new State(conversion.statesList.size()+1,
+					newState = new State(conversion.statesList.size(),
 										conversion.isInitial(conversion.statesList.size()),
 										false, 
 										Character.toString(expression.charAt(i)), 
@@ -77,10 +77,10 @@ public class ConversionER {
 					
 					for (int j = conversion.statesList.size()-1; j >= 0; j--) {
 						if(conversion.statesList.get(j).isUnionStart()) {
-							nextState = new State(conversion.statesList.size(),
-										false,
-										conversion.isFinal(i, expression.length())
-										);
+							nextState = new State(conversion.statesList.size()-1,
+													false,
+													conversion.isFinal(i, expression.length())
+													);
 							
 							conversion.statesList.get(j).addItemtoChange("L");
 							conversion.statesList.get(j).addNextState(nextState);
@@ -89,12 +89,20 @@ public class ConversionER {
 						}
 					}
 					
-					nextState = new State(conversion.statesList.size()-1,
+					int unionEnd = -1;
+					for (int j = conversion.statesList.size()-1; j >= 0; j--) {
+						if(conversion.statesList.get(j).isUnionEnd()) {
+							unionEnd = j;
+							j = -1;
+						}
+					}
+					
+					nextState = new State(conversion.statesList.get(unionEnd).getName(),
 										false,
 										conversion.isFinal(i, expression.length())
 										);
 					
-					newState = new State(conversion.statesList.size()+1,
+					newState = new State(conversion.statesList.size(),
 										conversion.isInitial(conversion.statesList.size()),
 										false, 
 										"L", 
@@ -112,6 +120,7 @@ public class ConversionER {
 							conversion.statesList.get(j).setNextStateName(0, conversion.statesList.size());
 							conversion.statesList.get(j).getItemToChange().remove(0);
 							conversion.statesList.get(j).getItemToChange().add(Character.toString(expression.charAt(i)));
+							conversion.statesList.get(j).setUnionEnd(false);
 							
 							conversion.statesList.get(j).printState();
 							conversion.statesList.get(conversion.statesList.size()-1).printState();
@@ -120,7 +129,7 @@ public class ConversionER {
 						}
 					}
 					
-					if(hasUnion == false) {
+					if(!hasUnion) {
 						nextState = new State(conversion.statesList.size()+1,
 											false,
 											conversion.isFinal(i, expression.length())
@@ -128,7 +137,7 @@ public class ConversionER {
 						
 						newState = new State(conversion.statesList.size(),
 											conversion.isInitial(conversion.statesList.size()),
-											false, 
+											false,
 											Character.toString(expression.charAt(i)), 
 											nextState
 											);
