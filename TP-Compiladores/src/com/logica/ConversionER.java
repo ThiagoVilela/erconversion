@@ -40,6 +40,7 @@ public class ConversionER {
 		for (int i = 0; i < expression.length(); i++) {
 			if (reader.isLetterLower(expression.charAt(i))) {
 				if (mainList.statesList.size() == 0) {
+
 					nextState = new State((i+1),
 										false,
 										mainList.isFinal(i, expression.length())
@@ -61,7 +62,8 @@ public class ConversionER {
 					mainList.statesList.add(newState);
 				}
 				
-				else if(expression.charAt(i-1) == '*') {
+				else if(i!=0 && expression.charAt(i-1) == '*') {
+					System.out.println("Nao é o primeiro elemento");
 					nextState = new State(mainList.statesList.size(),
 											false,
 											mainList.isFinal(i, expression.length())
@@ -77,7 +79,7 @@ public class ConversionER {
 					
 				}
 				
-				else if(expression.charAt(i-1) == 'U') {
+				else if(i!=0 && expression.charAt(i-1) == 'U') {
 					nextState = new State(mainList.statesList.size()+1,
 										false,
 										mainList.isFinal(i, expression.length())
@@ -183,13 +185,47 @@ public class ConversionER {
 			else if(expression.charAt(i) == '('){
 				
 				
-				ArrayList<State> transf = new ArrayList<State>();
+				ArrayList<State> auxStateList = new ArrayList<State>();
+				ConversionER auxiliar = new ConversionER();
 				
 				/* O Javinha está de brincadeira com a nossa cara - ele está salvando TODO O ROLE na porra do mainList que eu chamei SÓ PRA PASSAR PRO TRANSF */
 				/* Como a lógica nunca é realmente lógica - vamos deixar assim - caso de BUG NO MAINLIST volte aqui (: - Oremos. */
-				transf = mainList.logicFunction(mainList, expression.substring(i+1, expression.length())).statesList;
+				auxStateList = mainList.logicFunction(auxiliar, expression.substring(i+1, expression.length())).statesList;
+				
+				if(mainList.statesList.size() > 0) {
+					/* Improváveis - Jogo do troca - VALENDO! */
+					boolean oldLinksNew = false;
+					for (int j = 0; j < auxStateList.size(); j++) {
+						auxStateList.get(j).setName(mainList.statesList.size()+j);
+						for (int j2 = 0; j2 < auxStateList.get(j).getNextState().size(); j2++) {
+							auxStateList.get(j).setNextStateName(j2, (auxStateList.get(j).getNextStateName(j2))+(mainList.statesList.size()));
+							
+							if(mainList.statesList.get(mainList.statesList.size()-1).getNextState().get(j).getName() == auxStateList.get(j2).getName()) {
+								oldLinksNew = true;
+							}
+						}
+					}
 					
-				//mainList.statesList.addAll(transf);
+					if(!oldLinksNew) {
+						
+						for (int j = 0; j < auxStateList.get(0).getNextState().size(); j++) {
+							mainList.statesList.get(mainList.statesList.size()-1).addItemtoChange(auxStateList.get(0).getItemToChange().get(j));
+							mainList.statesList.get(mainList.statesList.size()-1).addNextState(auxStateList.get(0).getNextState().get(j));
+						}
+						
+						for (int k = 0; k < mainList.statesList.get(mainList.statesList.size()-1).getNextState().size(); k++) {
+							for (int j2 = 0; j2 < auxStateList.get(0).getNextState().size(); j2++) {
+								if(mainList.statesList.get(mainList.statesList.size()-1).getNextStateName(k) == auxStateList.get(0).getNextStateName(j2)) {
+									mainList.statesList.get(mainList.statesList.size()-1).setNextStateName(k, mainList.statesList.get(mainList.statesList.size()-1).getName()+1);
+								}
+							}
+						}
+						
+						auxStateList.remove(0);
+					}
+				}
+				
+				mainList.statesList.addAll(auxStateList);
 
 				for (int k = i+1; k < expression.length(); k++) {
 					if (expression.charAt(k) == ')') {
