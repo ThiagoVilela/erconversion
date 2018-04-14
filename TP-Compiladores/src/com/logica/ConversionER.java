@@ -74,6 +74,7 @@ public class ConversionER {
 					if(reader.validNext(i, expression.length())) {
 						if(expression.charAt(i+1) == '*' || reader.isReservedWord(expression.charAt(i+1))) {
 							mainList.statesList.get(mainList.statesList.size()-1).setChainStart(true);
+							//mainList.statesList.get(mainList.statesList.size()-1).setChainEnd(true);
 						}
 					}
 					
@@ -199,8 +200,11 @@ public class ConversionER {
 						auxStateList.get(j).setName(mainList.statesList.size()+j);
 						for (int j2 = 0; j2 < auxStateList.get(j).getNextState().size(); j2++) {
 							auxStateList.get(j).setNextStateName(j2, (auxStateList.get(j).getNextStateName(j2))+(mainList.statesList.size()));
-							//System.out.println("DEU ERRO COM: " + "q"+mainList.statesList.get(mainList.statesList.size()-1).getNextState().get(j).getName() + " e q" + auxStateList.get(j2).getName() );
-							/* CONTINUAR DAQUI - O rolê de várias letras dentro do parentese com elementos de fora a(aaa) */
+						}
+					}
+					
+					for (int j = 0; j < mainList.statesList.get(mainList.statesList.size()-1).getNextState().size(); j++) {
+						for (int j2 = 0; j2 < auxStateList.size(); j2++) {
 							if(mainList.statesList.get(mainList.statesList.size()-1).getNextState().get(j).getName() == auxStateList.get(j2).getName()) {
 								oldLinksNew = true;
 							}
@@ -273,10 +277,20 @@ public class ConversionER {
 		/* Acha a posição elemento inicial da cadeia que será afetada pelo União */
 		int startChainPosition = 0;
 		for (int j = conversion.statesList.size()-1; j >= 0 ; j--) {
-			if(conversion.statesList.get(j).isChainStart()) {
-				startChainPosition = j;
-				j = -1;
-				/* Achou a posição elemento inicial da cadeia que será afetada pela União */
+			if (expression.charAt(i-1) == '*') {
+				System.out.println("Achei um asterisco antes!");
+				/*if (conversion.statesList.get(j).isChainEnd()) {
+					startChainPosition = j-1;
+					System.out.println("setei o chainPosition em " + startChainPosition);
+					j = -1;
+				} 
+				else */if(conversion.statesList.get(j).isChainStart()) {
+					startChainPosition = j;
+					j = -1;
+					/* Achou a posição elemento inicial da cadeia que será afetada pela União */
+				}
+				
+				
 			}
 		}
 
