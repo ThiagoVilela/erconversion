@@ -180,6 +180,11 @@ public class ConversionER {
 			}
 			
 			else if(expression.charAt(i) == 'U') {
+				if(expression.charAt(i-1) == '*') {
+					//mainList.statesList.get(mainList.statesList.size()-1).setChainStart(true);
+					mainList.statesList.get(mainList.statesList.size()-1).setChainEnd(true);
+				}
+				
 				mainList = mainList.foundUnion(mainList, i, expression);
 			}
 			
@@ -257,40 +262,68 @@ public class ConversionER {
 		State nextState = new State();
 		State newState = new State();
 		
-		/* Primeira parte da União */
-		nextState = new State(conversion.statesList.size()+1,
-							false,
-							conversion.isFinal(i, expression.length())
-							);
+		/* Primeira parte da União 
+		 * Cria o ultimo estado da uniao*/
+		if (expression.charAt(i-1) == '*') {
+			
+			nextState = new State(-1,
+								false,
+								conversion.isFinal(i, expression.length())
+								);
+			
+			newState = new State(conversion.statesList.size(),
+								conversion.isInitial(conversion.statesList.size()),
+								false, 
+								null, 
+								nextState
+								);
+			newState.setUnionEnd(true);
+			conversion.statesList.add(newState);
+			
+			System.out.println("VOU LINKAR O ESTADO q"+conversion.statesList.get(conversion.statesList.size()-2).getName()+ " COM q"+newState.getName());
+			newState.printState();
+			/* REAL */
+			conversion.statesList.get(conversion.statesList.size()-2).getItemToChange().add("L");
+			conversion.statesList.get(conversion.statesList.size()-2).getNextState().add(newState);
+			/* REAL */
+			conversion.statesList.get(conversion.statesList.size()-2).printState();
+			System.out.println("TERMINEI O IF * DENTRO DO U");
 		
-		newState = new State(conversion.statesList.size(),
-							conversion.isInitial(conversion.statesList.size()),
-							false, 
-							"L", 
-							nextState
-							);
-		
-		newState.setUnionEnd(true);
-		conversion.statesList.add(newState);
+		}else {
+			nextState = new State(conversion.statesList.size()+1,
+								false,
+								conversion.isFinal(i, expression.length())
+								);
+			
+			newState = new State(conversion.statesList.size(),
+								conversion.isInitial(conversion.statesList.size()),
+								false, 
+								"L", 
+								nextState
+								);
+			newState.setUnionEnd(true);
+			conversion.statesList.add(newState);
+		}
 		
 		/* Segunda parte da União */
 		/* Acha a posição elemento inicial da cadeia que será afetada pelo União */
-		int startChainPosition = 0;
+		int startChainPosition = -1;
 		for (int j = conversion.statesList.size()-1; j >= 0 ; j--) {
-			if (expression.charAt(i-1) == '*') {
-				System.out.println("Achei um asterisco antes!");
-				/*if (conversion.statesList.get(j).isChainEnd()) {
+			if(conversion.statesList.get(j).isChainStart()) {
+				if (expression.charAt(i-1) == '*') {
 					startChainPosition = j-1;
-					System.out.println("setei o chainPosition em " + startChainPosition);
+					System.out.println("ACHEI O CHAIN NO q" + startChainPosition);
+					
+					conversion.statesList.get(j-1).setChainStart(true);
+					conversion.statesList.get(j).setChainStart(false);
+					
 					j = -1;
-				} 
-				else */if(conversion.statesList.get(j).isChainStart()) {
+				}
+				else {
 					startChainPosition = j;
 					j = -1;
 					/* Achou a posição elemento inicial da cadeia que será afetada pela União */
 				}
-				
-				
 			}
 		}
 
@@ -312,7 +345,7 @@ public class ConversionER {
 		auxStateList.add(newState);
 		
 		
-		/* Recorto do original pro auxiliar */
+		/* PASSSO 6 - Recorto do original pro auxiliar */
 		boolean control = true;
 		while(control) {
 			
@@ -324,32 +357,46 @@ public class ConversionER {
 			}
 		}
 		
-		/* Troco os nomes */
-		for (int j = 1; j < auxStateList.size(); j++) {
+		/* PASSO 7 - Troco os nomes */
+
+		for (int j = 1; j < auxStateList.size(); j++) { /* Verificar o limitador */
 			auxStateList.get(j).setName(auxStateList.get(j).getName()+1);
+			
+		}
+		
+		for (int j = 1; j < auxStateList.size(); j++) {
 			for (int j2 = 0; j2 < auxStateList.get(j).getNextState().size(); j2++) {
-				auxStateList.get(j).setNextStateName(j2, (auxStateList.get(j).getNextStateName(j2))+1);
+				if (auxStateList.get(j).getNextState().get(j2).getName() >= 0 && !auxStateList.get(j).getNextState().get(j2).isUnionEnd() ) {
+					auxStateList.get(j).setNextStateName(j2, (auxStateList.get(j).getNextStateName(j2))+1);
+				}
 			}
 		}
 		
+		
+		
+		/* PASSO 8 - Acho fim da união e adiciono o next state */
 		for (int j = auxStateList.size()-1; j >= 0; j--) {
 			if (auxStateList.get(j).isUnionEnd()) {
-				nextState = new State(-1,
-									false,
-									conversion.isFinal(i, expression.length())
-									);
-				
-				newState = new State(auxStateList.get(j).getNextStateName(0),
-									conversion.isInitial(conversion.statesList.size()),
-									false, 
-									null, 
-									nextState
-									);
-				
-				auxStateList.get(j).setUnionEnd(false);
-				newState.setUnionEnd(true);
-				auxStateList.add(newState);
-				j = -1;
+				if (expression.charAt(i-1) == '*') {
+					j = -1;
+				}else {
+					nextState = new State(-1,
+										false,
+										conversion.isFinal(i, expression.length())
+										);
+					
+					newState = new State(auxStateList.get(j).getNextStateName(0),
+										conversion.isInitial(conversion.statesList.size()),
+										false, 
+										null, 
+										nextState
+										);
+					
+					auxStateList.get(j).setUnionEnd(false);
+					newState.setUnionEnd(true);
+					auxStateList.add(newState);
+					j = -1;
+				}
 			}
 		}
 		/* Adição do vetor auxiliar no original */
