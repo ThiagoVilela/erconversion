@@ -81,55 +81,88 @@ public class ConversionER {
 				}
 				
 				else if(i!=0 && expression.charAt(i-1) == 'U') {
-					nextState = new State(mainList.statesList.size()+1,
-										false,
-										mainList.isFinal(i, expression.length())
-										);
-					
-					newState = new State(mainList.statesList.size(),
-										mainList.isInitial(mainList.statesList.size()),
-										false, 
-										Character.toString(expression.charAt(i)), 
-										nextState
-										);
-					
-					mainList.statesList.add(newState);
-					
-					for (int j = mainList.statesList.size()-1; j >= 0; j--) {
-						if(mainList.statesList.get(j).isUnionStart()) {
-							nextState = new State(mainList.statesList.size()-1,
-													false,
-													mainList.isFinal(i, expression.length())
-													);
-							
-							mainList.statesList.get(j).addItemtoChange("L");
-							mainList.statesList.get(j).addNextState(nextState);
-							
-							j = -1;
+					if (reader.validNext(i, expression.length()) && expression.charAt(i+1) == '*') {
+						nextState = new State(mainList.statesList.size()+1,
+											false,
+											mainList.isFinal(i, expression.length())
+											);
+						
+						newState = new State(mainList.statesList.size(),
+											mainList.isInitial(mainList.statesList.size()),
+											false, 
+											Character.toString(expression.charAt(i)), 
+											nextState
+											);
+						
+						newState.setChainStart(true);
+						mainList.statesList.add(newState);
+						
+						for (int j = mainList.statesList.size()-1; j >= 0; j--) {
+							if(mainList.statesList.get(j).isUnionStart()) {
+								nextState = new State(mainList.statesList.size()-1,
+														false,
+														mainList.isFinal(i, expression.length())
+														);
+								
+								mainList.statesList.get(j).addItemtoChange("L");
+								mainList.statesList.get(j).addNextState(nextState);
+								
+								j = -1;
+							}
 						}
+						
+					} else {
+						nextState = new State(mainList.statesList.size()+1,
+											false,
+											mainList.isFinal(i, expression.length())
+											);
+						
+						newState = new State(mainList.statesList.size(),
+											mainList.isInitial(mainList.statesList.size()),
+											false, 
+											Character.toString(expression.charAt(i)), 
+											nextState
+											);
+						
+						mainList.statesList.add(newState);
+						
+						for (int j = mainList.statesList.size()-1; j >= 0; j--) {
+							if(mainList.statesList.get(j).isUnionStart()) {
+								nextState = new State(mainList.statesList.size()-1,
+														false,
+														mainList.isFinal(i, expression.length())
+														);
+								
+								mainList.statesList.get(j).addItemtoChange("L");
+								mainList.statesList.get(j).addNextState(nextState);
+								
+								j = -1;
+							}
+						}
+						
+						int unionEnd = -1;
+						for (int j = mainList.statesList.size()-1; j >= 0; j--) {
+							if(mainList.statesList.get(j).isUnionEnd()) {
+								unionEnd = j;
+								j = -1;
+							}
+						}
+						
+						nextState = new State(mainList.statesList.get(unionEnd).getName(),
+											false,
+											mainList.isFinal(i, expression.length())
+											);
+						
+						newState = new State(mainList.statesList.size(),
+											mainList.isInitial(mainList.statesList.size()),
+											false, 
+											"L", 
+											nextState
+											);
+						
+						mainList.statesList.add(newState);
 					}
 					
-					int unionEnd = -1;
-					for (int j = mainList.statesList.size()-1; j >= 0; j--) {
-						if(mainList.statesList.get(j).isUnionEnd()) {
-							unionEnd = j;
-							j = -1;
-						}
-					}
-					
-					nextState = new State(mainList.statesList.get(unionEnd).getName(),
-										false,
-										mainList.isFinal(i, expression.length())
-										);
-					
-					newState = new State(mainList.statesList.size(),
-										mainList.isInitial(mainList.statesList.size()),
-										false, 
-										"L", 
-										nextState
-										);
-					
-					mainList.statesList.add(newState);
 				}
 				
 				else if(mainList.statesList.size() > 0) {
@@ -177,6 +210,23 @@ public class ConversionER {
 			
 			else if(expression.charAt(i) == '*') {
 				mainList = mainList.foundStarKey(mainList, i, expression);
+				if (reader.validPreview(i-1) && expression.charAt(i-2) == 'U') {
+					int unionEnd = -1;
+					for (int j = mainList.statesList.size()-1; j >= 0; j--) {
+						if(mainList.statesList.get(j).isUnionEnd()) {
+							unionEnd = j;
+							j = -1;
+						}
+					}
+					
+					nextState = new State(mainList.statesList.get(unionEnd).getName(),
+										false,
+										mainList.isFinal(i, expression.length())
+										);
+					
+					mainList.statesList.get(mainList.statesList.size()-1).addItemtoChange("L");
+					mainList.statesList.get(mainList.statesList.size()-1).addNextState(nextState);;
+				}
 			}
 			
 			else if(expression.charAt(i) == 'U') {
