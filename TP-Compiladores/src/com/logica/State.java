@@ -15,6 +15,8 @@ public class State {
 
 	private boolean unionStart = false;
 	private boolean unionEnd = false;
+	
+	private boolean insideUnion = false;
 
 	/* Construtores */
 	public State() {
@@ -177,8 +179,13 @@ public class State {
 	public boolean isChainEnd() {
 		return chainEnd;
 	}
-
 	public void setChainEnd(boolean chainEnd) {
 		this.chainEnd = chainEnd;
+	}
+	public boolean isInsideUnion() {
+		return insideUnion;
+	}
+	public void setInsideUnion(boolean insideUnion) {
+		this.insideUnion = insideUnion;
 	}
 }
