@@ -206,4 +206,24 @@ public class State {
 		}
 		return state;
 	}
+	
+	public int findChainStart(ArrayList<State> statesList) {
+		for (int i = 0; i < statesList.size(); i++) {
+			if(statesList.get(i).isChainStart()) {
+				/* Apago o antigo start */
+				return i;
+			}
+		}
+		return -1;
+	}
+	
+	public int findChainEnd(ArrayList<State> statesList) {
+		for (int i = 0; i < statesList.size(); i++) {
+			if(statesList.get(i).isChainEnd()) {
+				/* Apago o antigo start */
+				return i;
+			}
+		}
+		return -1;
+	}
 }

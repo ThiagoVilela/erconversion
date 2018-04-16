@@ -7,21 +7,21 @@ public class ConversionER {
 	/* Atributos */
 	public ArrayList<State> statesList = new ArrayList<State>();
 	public String expression;
-	
+
 	public static void main(String[] args) {
 		ConversionER conversion = new ConversionER();
 		ConversionER aux = new ConversionER();
-		
+
 		State nextState = new State();
 		State newState = new State();
 		Read reader = new Read();
-		
+
 		/* Teste de entrada via teclado */
 		Scanner in = new Scanner(System.in);
 		String expression = in.nextLine();
 		in.close();
 		/* Fim Teste de entrada via teclado */
-		
+
 		/* Talvez dê pala com mais parênteses */
 		conversion.statesList = new ArrayList<State>();
 		conversion = aux.logicFunction(aux, expression);
@@ -43,28 +43,27 @@ public class ConversionER {
 			conversion.statesList.get(i).printState();
 		}
 	}
-	
+
 	public ConversionER logicFunction(ConversionER mainList, String expression) {
 		State logicState = new State();
 		State newState = new State();
 		Read reader = new Read();
-		
+
 		for (int i = 0; i < expression.length(); i++) {
-			System.out.println("ENTREI NO FOR");
-						/****************************************************** REFATORAÇÃO TOTAL ******************************************************/
-				/****************************************************** PASSO1 - 'a' GERA 2 ESTADOS ******************************************************/
-				/****************************************************** PASSO1 - 'aa' LINKA O CHAINEND ******************************************************/
+			/****************************************************** REFATORAÇÃO TOTAL ******************************************************/
+			/****************************************************** PASSO1 - 'a' GERA 2 ESTADOS ******************************************************/
+			/****************************************************** PASSO2 - 'aa' LINKA O CHAINEND ******************************************************/
+			/****************************************************** PASSO3 - 'aU' ADD FIM INICIO ******************************************************/
 			if (reader.isLetterLower(expression.charAt(i))) {
-				
 				if (mainList.statesList.size() == 0) {
 					/* Crio o estado inicial */
 					newState = new State(0,
-										Character.toString(expression.charAt(i)), 
-										 new State((1))
-										);
+							Character.toString(expression.charAt(i)), 
+							new State((1))
+							);
 					newState.setChainStart(true);
 					mainList.statesList.add(newState);
-					
+
 					/* Crio a ligação e o estado final */
 					newState = new State(1,
 							"F", 
@@ -73,47 +72,46 @@ public class ConversionER {
 					newState.setChainEnd(true);
 					mainList.statesList.add(newState);
 				}
-				
+
 				else if(mainList.statesList.size() > 0) {
 					/* Acha o Chain End (fim da cadeia) */
-					for (int j = 0; j < mainList.statesList.size(); j++) {
-						
-						if(mainList.statesList.get(j).isChainStart()) {
-							/* Apago o antigo start */
-							mainList.statesList.get(j).setChainStart(false);
-						}
-						
-						if (mainList.statesList.get(j).isChainEnd()) {
-							/* Faço o chain end linkar no novo estado final */
-							mainList.statesList.set(j, logicState.swapFinalLink(mainList.statesList.get(j), 
+					
+					int positionStart = logicState.findChainStart(mainList.statesList);
+					int positionEnd = logicState.findChainEnd(mainList.statesList);
+					
+					/* Apago o antigo start */
+					mainList.statesList.get(positionStart).setChainStart(false);
+					
+					/* Faço o chain end linkar no novo estado final */
+					mainList.statesList.set(positionEnd, logicState.swapFinalLink(mainList.statesList.get(positionEnd), 
 																				expression.charAt(i), 
 																				mainList.statesList.size()));
-							
-							/* Crio o novo estado final */
-							newState = new State(mainList.statesList.size(),
-									"F", 
-									new State((-1))
-									);
-							newState.setChainEnd(true);
-							mainList.statesList.add(newState);
-							
-							/* Movo o novo end para o último estado e o novo start para o penúltimo */
-							mainList.statesList.get(j).setChainStart(true);
-							mainList.statesList.get(j).setChainEnd(false);
-							
-							j = mainList.statesList.size();
-						}	
-					}
-				}
-			
-				else {
-					System.out.println("Erro na criação do estado");
+
+					/* Crio o novo estado final */
+					newState = new State(mainList.statesList.size(),
+										"F", 
+										new State((-1))
+										);
+					newState.setChainEnd(true);
+					mainList.statesList.add(newState);
+
+					/* Movo o novo end para o último estado e o novo start para o penúltimo */
+					mainList.statesList.get(positionEnd).setChainStart(true);
+					mainList.statesList.get(positionEnd).setChainEnd(false);
 				}
 			}
+			
+			else if(expression.charAt(i) == 'U') {
+				
+			}
+			
+			else {
+				System.out.println("Erro na criação do estado");
+			}
 		}
-		
+
 		return mainList;
-		
+
 	}
 	
 	public ConversionER foundUnion(ConversionER conversion, int i, String expression) {
