@@ -239,16 +239,27 @@ public class ConversionER {
 						}
 					}
 					
+			
+					
 					if(!oldLinksNew) {
-						if (mainList.statesList.get(mainList.statesList.size()-1).isUnionEnd()) {
-							nextState = new State(mainList.statesList.get(mainList.getLastState()).getName());
+						if (mainList.statesList.get(mainList.statesList.size()-1).isUnionEnd() && 
+								(mainList.statesList.get(mainList.statesList.size()-1).getNextStateName(0) == -1)) {
 							
-							newState = new State(auxStateList.get(auxStateList.size()-1).getName()+1,
-												"L", 
-												nextState
-												);
+							/* REMOVER O -1 E NULL DA LIGAÇÃO */
+							for (int j = auxStateList.size()-1; j >=0; j--) {
+								System.out.println("FROZAO DA MSSA");
+								for (int j2 = 0; j2 < auxStateList.get(j).getNextState().size(); j2++) {
+									if (/*auxStateList.get(j).getNextState().get(j2).getName() == -1 &&*/ auxStateList.get(j).getItemToChange().get(j2) == null) {
+										System.out.println("IFZAO DA MSSA");
+										auxStateList.get(j).getItemToChange().remove(j2);
+										auxStateList.get(j).addItemtoChange("L");
+										j2 = auxStateList.size();
+										
+									}
+								}
+							}
 							
-							auxStateList.add(newState);
+							/* REMOVER A ÚLTIMA TRANSIÇÃO Q-1 - VOLTAR AQUI */
 							
 							for (int j = mainList.statesList.size()-1; j >= 0; j--) {
 								if(mainList.statesList.get(j).isUnionStart()) {
@@ -259,8 +270,11 @@ public class ConversionER {
 									
 									j = -1;
 								}
-							}
+							}//VOLTAR
 							
+							System.out.println();
+							mainList.printTudo(auxStateList);
+							System.out.println();
 							/*
 							int unionEnd = -1;
 							for (int j = mainList.statesList.size()-1; j >= 0; j--) {
@@ -279,7 +293,29 @@ public class ConversionER {
 							
 							mainList.statesList.add(newState);*/
 							
-						} else {
+						} 
+						else if(mainList.statesList.get(mainList.statesList.size()-1).isUnionEnd()){
+							nextState = new State(mainList.statesList.get(mainList.getLastState()).getName());
+
+							newState = new State(auxStateList.get(auxStateList.size()-1).getName()+1,
+									"L", 
+									nextState
+									);
+
+							auxStateList.add(newState);
+
+							for (int j = mainList.statesList.size()-1; j >= 0; j--) {
+								if(mainList.statesList.get(j).isUnionStart()) {
+									nextState = new State(auxStateList.get(0).getName());
+
+									mainList.statesList.get(j).addItemtoChange("L");
+									mainList.statesList.get(j).addNextState(nextState);
+
+									j = -1;
+								}
+							}
+						}	
+						else {
 							for (int j = 0; j < auxStateList.get(0).getNextState().size(); j++) {
 								mainList.statesList.get(mainList.statesList.size()-1).addItemtoChange(auxStateList.get(0).getItemToChange().get(j));
 								mainList.statesList.get(mainList.statesList.size()-1).addNextState(auxStateList.get(0).getNextState().get(j));
