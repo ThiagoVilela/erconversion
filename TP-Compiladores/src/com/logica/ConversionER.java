@@ -30,12 +30,12 @@ public class ConversionER {
 		System.out.println();
 		for (int i = 0; i < conversion.statesList.size(); i++) {
 			if (conversion.statesList.get(i).isChainStart()) {
-				System.out.println("ESSE EMBAIXO E START!");
-			} else if (conversion.statesList.get(i).isChainEnd()) {
-				System.out.println("ESSE EMBAIXO E END!");
-			} else if (conversion.statesList.get(i).isUnionStart()) {
+				System.out.println("ESSE EMBAIXO E CHAIN START!");
+			} if (conversion.statesList.get(i).isChainEnd()) {
+				System.out.println("ESSE EMBAIXO E CHAIN END!");
+			}  if (conversion.statesList.get(i).isUnionStart()) {
 				System.out.println("ESSE EMBAIXO E UNION START!");
-			} else if (conversion.statesList.get(i).isUnionEnd()) {
+			}  if (conversion.statesList.get(i).isUnionEnd()) {
 				System.out.println("ESSE EMBAIXO E UNION END!");
 			}
 			conversion.statesList.get(i).printState();
@@ -257,22 +257,6 @@ public class ConversionER {
 				}
 				
 				mainList.statesList.addAll(auxStateList);
-				
-				System.out.println();
-				System.out.println();
-				for (int j = 0; j < mainList.statesList.size(); j++) {
-					if (mainList.statesList.get(j).isChainStart()) {
-						System.out.println("ESSE EMBAIXO E START!");
-					}  if (mainList.statesList.get(j).isChainEnd()) {
-						System.out.println("ESSE EMBAIXO E END!");
-					}  if (mainList.statesList.get(j).isUnionStart()) {
-						System.out.println("ESSE EMBAIXO E UNION START!");
-					}  if (mainList.statesList.get(j).isUnionEnd()) {
-						System.out.println("ESSE EMBAIXO E UNION END!");
-					}
-					mainList.statesList.get(j).printState();
-				}
-				System.out.println();System.out.println();
 
 				for (int k = i+1; k < expression.length(); k++) {
 					if (expression.charAt(k) == ')') {
@@ -293,6 +277,7 @@ public class ConversionER {
 					int endPosition = 0;
 					
 					for (int j = 0; j < mainList.statesList.size(); j++) {
+						System.out.println("ESTOU RODANDO O ELEMENTO Q"+mainList.statesList.get(j).getName());
 						if (mainList.statesList.get(j).isChainStart() && (mainList.statesList.get(j).getName() < mainList.statesList.get(startPosition).getName())) {
 							startPosition = j;
 						}
@@ -301,8 +286,9 @@ public class ConversionER {
 							mainList.statesList.get(j).setChainStart(false);
 						}
 						
-						else if(mainList.statesList.get(j).isUnionEnd() && (mainList.statesList.get(j).getName() > mainList.statesList.get(endPosition).getName())) {
-							endPosition = j;
+						else if(mainList.statesList.get(j).isUnionEnd() && (j == mainList.statesList.size()-1)) {
+							//endPosition = j;
+							mainList.statesList.get(j).setChainEnd(true);
 						}
 						
 						else if(mainList.statesList.get(j).isUnionEnd()){
@@ -319,9 +305,9 @@ public class ConversionER {
 						mainList.statesList.get(startPosition).setChainStart(false);
 					}
 					
-					if (endPosition > 0) {
+					/*if (endPosition > 0) {
 						mainList.statesList.get(endPosition).setChainEnd(true);
-					}
+					}*/
 					
 					mainList.statesList.get(mainList.statesList.size()-1).setInsideUnion(true);
 				}
@@ -466,8 +452,10 @@ public class ConversionER {
 		/* PASSO 8 - Acho fim da união e adiciono o next state */
 		for (int j = auxStateList.size()-1; j >= 0; j--) {
 			if (auxStateList.get(j).isUnionEnd()) {
-				if (auxStateList.get(j-1).isChainEnd()) {
+				if (auxStateList.get(j-1).isChainEnd() || auxStateList.get(j-1).isInsideUnion()) {
 					j = -1;
+					auxStateList.get(1).setUnionStart(false);
+					auxStateList.get(0).setUnionStart(true);
 				}else {
 					nextState = new State(-1);
 					
@@ -487,7 +475,7 @@ public class ConversionER {
 		/* Troca das marcações pras próximas lógicas */
 		auxStateList.get(0).setChainStart(true);
 		auxStateList.get(1).setChainStart(false);
-		auxStateList.get(auxStateList.size()-1).setChainEnd(false);
+		auxStateList.get(auxStateList.size()-1).setChainEnd(true);
 		auxStateList.get(auxStateList.size()-2).setChainEnd(false);
 		
 		/* Adição do vetor auxiliar no original */
@@ -604,6 +592,16 @@ public class ConversionER {
 		states.get(0).setInicial(true);
 		states.get(states.size()-1).setFinal(true);
 		return states;
+	}
+	
+	public void printTudo(ArrayList<State> auxStateList) {
+		System.out.println();
+		System.out.println("VOU IMPRIMIR O AUXILIAR PRA SABER DO ROLE!");
+		for (int j = 0; j < auxStateList.size(); j++) {
+			auxStateList.get(j).printState();
+		}
+		System.out.println("IMPRIMI O AUXILIAR PRA SABER DO ROLE!");
+		System.out.println();
 	}
 	
 	public int getLastState() {
