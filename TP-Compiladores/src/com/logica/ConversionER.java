@@ -220,6 +220,8 @@ public class ConversionER {
 				auxStateList = mainList.logicFunction(auxiliar, expression.substring(i+1, expression.length())).statesList;
 				
 				if(mainList.statesList.size() > 0) {
+					System.out.println("O TAMANHO DO ME AUX E: ");
+					System.out.println(auxStateList.size());
 					/* Improváveis - Jogo do troca - VALENDO! */
 					boolean oldLinksNew = false;
 					for (int j = 0; j < auxStateList.size(); j++) {
@@ -238,21 +240,61 @@ public class ConversionER {
 					}
 					
 					if(!oldLinksNew) {
-						
-						for (int j = 0; j < auxStateList.get(0).getNextState().size(); j++) {
-							mainList.statesList.get(mainList.statesList.size()-1).addItemtoChange(auxStateList.get(0).getItemToChange().get(j));
-							mainList.statesList.get(mainList.statesList.size()-1).addNextState(auxStateList.get(0).getNextState().get(j));
-						}
-						
-						for (int k = 0; k < mainList.statesList.get(mainList.statesList.size()-1).getNextState().size(); k++) {
-							for (int j2 = 0; j2 < auxStateList.get(0).getNextState().size(); j2++) {
-								if(mainList.statesList.get(mainList.statesList.size()-1).getNextStateName(k) == auxStateList.get(0).getNextStateName(j2)) {
-									mainList.statesList.get(mainList.statesList.size()-1).setNextStateName(k, mainList.statesList.get(mainList.statesList.size()-1).getName()+1);
+						if (mainList.statesList.get(mainList.statesList.size()-1).isUnionEnd()) {
+							nextState = new State(mainList.statesList.get(mainList.getLastState()).getName());
+							
+							newState = new State(auxStateList.get(auxStateList.size()-1).getName()+1,
+												"L", 
+												nextState
+												);
+							
+							auxStateList.add(newState);
+							
+							for (int j = mainList.statesList.size()-1; j >= 0; j--) {
+								if(mainList.statesList.get(j).isUnionStart()) {
+									nextState = new State(auxStateList.get(0).getName());
+									
+									mainList.statesList.get(j).addItemtoChange("L");
+									mainList.statesList.get(j).addNextState(nextState);
+									
+									j = -1;
 								}
 							}
+							
+							/*
+							int unionEnd = -1;
+							for (int j = mainList.statesList.size()-1; j >= 0; j--) {
+								if(mainList.statesList.get(j).isUnionEnd()) {
+									unionEnd = j;
+									j = -1;
+								}
+							}
+							
+							nextState = new State(mainList.statesList.get(unionEnd).getName());
+							
+							newState = new State(mainList.statesList.size(),
+												"L", 
+												nextState
+												);
+							
+							mainList.statesList.add(newState);*/
+							
+						} else {
+							for (int j = 0; j < auxStateList.get(0).getNextState().size(); j++) {
+								mainList.statesList.get(mainList.statesList.size()-1).addItemtoChange(auxStateList.get(0).getItemToChange().get(j));
+								mainList.statesList.get(mainList.statesList.size()-1).addNextState(auxStateList.get(0).getNextState().get(j));
+							}
+							
+							for (int k = 0; k < mainList.statesList.get(mainList.statesList.size()-1).getNextState().size(); k++) {
+								for (int j2 = 0; j2 < auxStateList.get(0).getNextState().size(); j2++) {
+									if(mainList.statesList.get(mainList.statesList.size()-1).getNextStateName(k) == auxStateList.get(0).getNextStateName(j2)) {
+										mainList.statesList.get(mainList.statesList.size()-1).setNextStateName(k, mainList.statesList.get(mainList.statesList.size()-1).getName()+1);
+									}
+								}
+							}
+							
+							auxStateList.remove(0);
 						}
-						
-						auxStateList.remove(0);
 					}
 				}
 				
@@ -262,17 +304,16 @@ public class ConversionER {
 					if (expression.charAt(k) == ')') {
 						i = k;
 						k = expression.length();
-						if (reader.validNext(k, expression.length()) && expression.charAt(k+1) == 'U') {
-							
-						}
 					}
 				}
 			}
 			
 			else if(expression.charAt(i) == ')'){
+				System.out.println("ENTREI NO IF COM a lista de tamanho "+mainList.statesList.size());
+				System.out.println("Entrei com o custo do primeiro elemento sendo " + mainList.statesList.get(0).getItemToChange().get(0));
 				
 				if (mainList.statesList.size() > 0 && mainList.statesList.get(0).isUnionStart()) {
-
+					
 					int startPosition = mainList.statesList.size()-1;
 					int endPosition = 0;
 					
