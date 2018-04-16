@@ -5,8 +5,8 @@ import java.util.ArrayList;
 public class State {
 	/* Atributos */
 	private int name;
-	private boolean isInicial;
-	private boolean isFinal;
+	private boolean isInicial = false;
+	private boolean isFinal = false;
 	private ArrayList<String> transition = new ArrayList<String>();
 	private ArrayList<State> nextState = new ArrayList<State>();
 	
@@ -32,8 +32,6 @@ public class State {
 	public State(int name) {
 		super();
 		this.name = name;
-		this.isInicial = false;
-		this.isFinal = false;
 		this.transition = null;
 		this.nextState = null;
 		this.chainStart = false;
@@ -56,6 +54,15 @@ public class State {
 		this.isFinal = isFinal;
 		this.transition = null;
 		this.nextState = null;
+		this.chainStart = false;
+	}
+	
+	public State(int name, String newTransition,
+			State newNextState) {
+		super();
+		this.name = name;
+		this.transition.add(newTransition) ;
+		this.nextState.add(newNextState);
 		this.chainStart = false;
 	}
 	

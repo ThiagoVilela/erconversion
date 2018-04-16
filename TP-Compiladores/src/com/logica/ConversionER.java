@@ -25,6 +25,7 @@ public class ConversionER {
 		/* Talvez dê pala com mais parênteses */
 		conversion.statesList = new ArrayList<State>();
 		conversion = aux.logicFunction(aux, expression);
+		conversion.statesList = conversion.setInitialOrEnd(conversion.statesList);
 
 		System.out.println();
 		for (int i = 0; i < conversion.statesList.size(); i++) {
@@ -50,14 +51,9 @@ public class ConversionER {
 			if (reader.isLetterLower(expression.charAt(i))) {
 				if (mainList.statesList.size() == 0) {
 
-					nextState = new State((i+1),
-										false,
-										mainList.isFinal(i, expression.length())
-										);
+					nextState = new State((i+1));
 					
 					newState = new State(i,
-										mainList.isInitial(mainList.statesList.size()),
-										false, 
 										Character.toString(expression.charAt(i)), 
 										nextState
 										);
@@ -74,10 +70,8 @@ public class ConversionER {
 				
 				else if(i!=0 && expression.charAt(i-1) == '*') {
 					System.out.println("Nao é o primeiro elemento");
-					nextState = new State(mainList.statesList.size(),
-											false,
-											mainList.isFinal(i, expression.length())
-											);
+					
+					nextState = new State(mainList.statesList.size());
 					mainList.statesList.get(mainList.statesList.size()-1).addItemtoChange(Character.toString(expression.charAt(i)));
 					mainList.statesList.get(mainList.statesList.size()-1).addNextState(nextState);
 					
@@ -92,14 +86,9 @@ public class ConversionER {
 				
 				else if(i!=0 && expression.charAt(i-1) == 'U') {
 					if (reader.validNext(i, expression.length()) && expression.charAt(i+1) == '*') {
-						nextState = new State(mainList.statesList.size()+1,
-											false,
-											mainList.isFinal(i, expression.length())
-											);
+						nextState = new State(mainList.statesList.size()+1);
 						
 						newState = new State(mainList.statesList.size(),
-											mainList.isInitial(mainList.statesList.size()),
-											false, 
 											Character.toString(expression.charAt(i)), 
 											nextState
 											);
@@ -109,10 +98,7 @@ public class ConversionER {
 						
 						for (int j = mainList.statesList.size()-1; j >= 0; j--) {
 							if(mainList.statesList.get(j).isUnionStart()) {
-								nextState = new State(mainList.statesList.size()-1,
-														false,
-														mainList.isFinal(i, expression.length())
-														);
+								nextState = new State(mainList.statesList.size()-1);
 								
 								mainList.statesList.get(j).addItemtoChange("L");
 								mainList.statesList.get(j).addNextState(nextState);
@@ -122,14 +108,9 @@ public class ConversionER {
 						}
 						
 					} else {
-						nextState = new State(mainList.statesList.size()+1,
-											false,
-											mainList.isFinal(i, expression.length())
-											);
+						nextState = new State(mainList.statesList.size()+1);
 						
 						newState = new State(mainList.statesList.size(),
-											mainList.isInitial(mainList.statesList.size()),
-											false, 
 											Character.toString(expression.charAt(i)), 
 											nextState
 											);
@@ -138,10 +119,7 @@ public class ConversionER {
 						
 						for (int j = mainList.statesList.size()-1; j >= 0; j--) {
 							if(mainList.statesList.get(j).isUnionStart()) {
-								nextState = new State(mainList.statesList.size()-1,
-														false,
-														mainList.isFinal(i, expression.length())
-														);
+								nextState = new State(mainList.statesList.size()-1);
 								
 								mainList.statesList.get(j).addItemtoChange("L");
 								mainList.statesList.get(j).addNextState(nextState);
@@ -158,14 +136,9 @@ public class ConversionER {
 							}
 						}
 						
-						nextState = new State(mainList.statesList.get(unionEnd).getName(),
-											false,
-											mainList.isFinal(i, expression.length())
-											);
+						nextState = new State(mainList.statesList.get(unionEnd).getName());
 						
 						newState = new State(mainList.statesList.size(),
-											mainList.isInitial(mainList.statesList.size()),
-											false, 
 											"L", 
 											nextState
 											);
@@ -191,14 +164,9 @@ public class ConversionER {
 					}
 					
 					if(!hasUnion) {
-						nextState = new State(mainList.statesList.size()+1,
-											false,
-											mainList.isFinal(i, expression.length())
-											);
+						nextState = new State(mainList.statesList.size()+1);
 						
 						newState = new State(mainList.statesList.size(),
-											mainList.isInitial(mainList.statesList.size()),
-											false,
 											Character.toString(expression.charAt(i)), 
 											nextState
 											);
@@ -229,10 +197,7 @@ public class ConversionER {
 						}
 					}
 					
-					nextState = new State(mainList.statesList.get(unionEnd).getName(),
-										false,
-										mainList.isFinal(i, expression.length())
-										);
+					nextState = new State(mainList.statesList.get(unionEnd).getName());
 					
 					mainList.statesList.get(mainList.statesList.size()-1).addItemtoChange("L");
 					mainList.statesList.get(mainList.statesList.size()-1).addNextState(nextState);;
@@ -384,14 +349,9 @@ public class ConversionER {
 				if (conversion.statesList.get(j).isUnionEnd()) {
 					
 					
-					nextState = new State(-1,
-										false,
-										conversion.isFinal(i, expression.length())
-										);
+					nextState = new State(-1);
 					
 					newState = new State(conversion.statesList.size(),
-										conversion.isInitial(conversion.statesList.size()),
-										false, 
 										null, 
 										nextState
 										);
@@ -424,14 +384,9 @@ public class ConversionER {
 		}
 		else if (conversion.statesList.get(conversion.getLastState()).isChainEnd()) {
 			
-			nextState = new State(-1,
-								false,
-								conversion.isFinal(i, expression.length())
-								);
+			nextState = new State(-1);
 			
-			newState = new State(conversion.statesList.size(),
-								conversion.isInitial(conversion.statesList.size()),
-								false, 
+			newState = new State(conversion.statesList.size(), 
 								null, 
 								nextState
 								);
@@ -448,14 +403,9 @@ public class ConversionER {
 			System.out.println("TERMINEI O IF * DENTRO DO U");
 		
 		}else {
-			nextState = new State(conversion.statesList.size()+1,
-								false,
-								conversion.isFinal(i, expression.length())
-								);
+			nextState = new State(conversion.statesList.size()+1);
 			
 			newState = new State(conversion.statesList.size(),
-								conversion.isInitial(conversion.statesList.size()),
-								false, 
 								"L", 
 								nextState
 								);
@@ -477,14 +427,9 @@ public class ConversionER {
 		/* Terceira parte do União */
 		ArrayList<State> auxStateList = new ArrayList<State>();
 		
-		nextState = new State(conversion.statesList.get(startChainPosition+1).getName(),
-						conversion.isInitial(conversion.statesList.size()),
-						conversion.isFinal(i, expression.length())
-						);
+		nextState = new State(conversion.statesList.get(startChainPosition+1).getName());
 		
 		newState = new State(startChainPosition,
-						conversion.isInitial(conversion.statesList.size()),
-						conversion.isFinal(i, expression.length()),
 						"L", 
 						nextState
 						);
@@ -524,14 +469,9 @@ public class ConversionER {
 				if (auxStateList.get(j-1).isChainEnd()) {
 					j = -1;
 				}else {
-					nextState = new State(-1,
-										false,
-										conversion.isFinal(i, expression.length())
-										);
+					nextState = new State(-1);
 					
 					newState = new State(auxStateList.get(j).getNextStateName(0),
-										conversion.isInitial(conversion.statesList.size()),
-										false, 
 										null, 
 										nextState
 										);
@@ -560,14 +500,9 @@ public class ConversionER {
 		State newState = new State();
 		
 		/* Primeira parte do fecho de Kleene */
-		nextState = new State(conversion.statesList.size()+1,
-							false,
-							conversion.isFinal(i, expression.length())
-							);
+		nextState = new State(conversion.statesList.size()+1);
 		
 		newState = new State(conversion.statesList.size(),
-							conversion.isInitial(conversion.statesList.size()),
-							false, 
 							"L", 
 							nextState
 							);
@@ -586,14 +521,9 @@ public class ConversionER {
 			
 		}
 		
-		nextState = new State(conversion.statesList.get(startChainPosition).getName(),
-							conversion.isInitial(conversion.statesList.size()),
-							conversion.isFinal(i, expression.length())
-							);
+		nextState = new State(conversion.statesList.get(startChainPosition).getName());
 		
 		newState = new State(conversion.statesList.size(),
-							false,
-							conversion.isFinal(i, expression.length()),
 							"L", 
 							nextState
 							);
@@ -603,14 +533,9 @@ public class ConversionER {
 		/* Terceira parte do fecho de Kleene */
 		ArrayList<State> auxStateList = new ArrayList<State>();
 		
-		nextState = new State(conversion.statesList.get(startChainPosition+1).getName(),
-							conversion.isInitial(conversion.statesList.size()),
-							conversion.isFinal(i, expression.length())
-							);
+		nextState = new State(conversion.statesList.get(startChainPosition+1).getName());
 		
 		newState = new State(startChainPosition,
-							conversion.isInitial(conversion.statesList.size()),
-							conversion.isFinal(i, expression.length()),
 							"L", 
 							nextState
 							);
@@ -619,10 +544,7 @@ public class ConversionER {
 		auxStateList.add(newState);
 		
 		/* Recorto do original pro auxiliar */
-		nextState = new State(conversion.statesList.get(startChainPosition+1).getName(),
-							conversion.isInitial(conversion.statesList.size()),
-							conversion.isFinal(i, expression.length())
-							);
+		nextState = new State(conversion.statesList.get(startChainPosition+1).getName());
 		
 		boolean control = true;
 		while(control) {
@@ -654,14 +576,9 @@ public class ConversionER {
 			}
 		}
 		/* Adição o último estado do vetor aux apontando pro antigo inicial */
-		nextState = new State(auxStateList.get(1).getName(),
-							conversion.isInitial(conversion.statesList.size()),
-							conversion.isFinal(i, expression.length())
-							);
+		nextState = new State(auxStateList.get(1).getName());
 		
 		newState = new State(auxStateList.size()+conversion.statesList.size(),
-							false,
-							conversion.isFinal(i, expression.length()),
 							"L",
 							nextState
 							);
@@ -669,10 +586,7 @@ public class ConversionER {
 		
 		/* Adição da nova transição do novo incial pro novo final do vetor aux */
 		
-		auxStateList.get(0).addNextState(new State(auxStateList.get(auxStateList.size()-1).getName(),
-													conversion.isInitial(conversion.statesList.size()),
-													conversion.isFinal(i, expression.length())
-													));
+		auxStateList.get(0).addNextState(new State(auxStateList.get(auxStateList.size()-1).getName()));
 		auxStateList.get(0).addItemtoChange("L");
 		
 		/* Realizo as marcações para controle de lógica do inicio e fim do Kleene */
@@ -686,20 +600,10 @@ public class ConversionER {
 	}
 	 
 	/* mudar para q0 */
-	public boolean isInitial(int size) {
-		if(size == 0) {
-			return true;
-		}else {
-			return false;
-		}
-	}
-	
-	public boolean isFinal(int position, int size) {
-		if(position == size-1) {
-			return true;
-		}else {
-			return false;
-		}
+	public ArrayList<State> setInitialOrEnd(ArrayList<State> states) {
+		states.get(0).setInicial(true);
+		states.get(states.size()-1).setFinal(true);
+		return states;
 	}
 	
 	public int getLastState() {
