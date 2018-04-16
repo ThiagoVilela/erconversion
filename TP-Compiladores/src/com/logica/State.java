@@ -195,4 +195,15 @@ public class State {
 	public void setInsideUnion(boolean insideUnion) {
 		this.insideUnion = insideUnion;
 	}
+	
+	public State swapFinalLink(State state, char item, int nextItem) {
+		for (int i = 0; i < state.getNextState().size(); i++) {
+			if (state.getItemToChange().get(i) == "F" && state.getNextState().get(i).getName() == -1){
+				state.getTransition().set(i, Character.toString(item));
+				state.getNextState().get(i).setName(nextItem);
+				i = state.getNextState().size();
+			}
+		}
+		return state;
+	}
 }
