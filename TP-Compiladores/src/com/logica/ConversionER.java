@@ -149,39 +149,108 @@ public class ConversionER {
 		State logicState = new State();
 		State newState = new State();
 		
-		/**************************** PASSO 1 da União - Ultimo estado ****************************/
-		/**************************** Adiciono último estado e linko o antigo para ele ****************************/
-		int positionEnd = logicState.findChainEnd(conversion.statesList);
+		/* Pego a posição do chainstart e verifico se ele é também union end */
+		if (conversion.statesList.get(logicState.findChainStart(conversion.statesList)).isUnionEnd()) {
+			return conversion.specialUnion(conversion);
+		}
+		
+		else {
+			/**************************** PASSO 1 da União - Ultimo estado ****************************/
+			/**************************** Adiciono último estado e linko o antigo para ele ****************************/
+			int positionEnd = logicState.findChainEnd(conversion.statesList);
+			
+			/* Faço o chain end linkar no novo estado final e tiro o chainend */
+			conversion.statesList.set(positionEnd, logicState.swapFinalLink(conversion.statesList.get(positionEnd), 
+																			'L', 
+																			conversion.statesList.size()));
+			conversion.statesList.get(positionEnd).setChainEnd(false);
 
-		/* Faço o chain end linkar no novo estado final e tiro o chainend */
-		conversion.statesList.set(positionEnd, logicState.swapFinalLink(conversion.statesList.get(positionEnd), 
-				'L', 
-				conversion.statesList.size()));
-		conversion.statesList.get(positionEnd).setChainEnd(false);
+			/* Crio o novo estado final */
+			newState = new State(conversion.statesList.size(),
+					"F", 
+					new State((-1))
+					);
+			newState.setChainEnd(true);
+			newState.setUnionEnd(true);
+			conversion.statesList.add(newState);
 
-		/* Crio o novo estado final */
-		newState = new State(conversion.statesList.size(),
-				"F", 
-				new State((-1))
-				);
-		newState.setChainEnd(true);
-		newState.setUnionEnd(true);
-		conversion.statesList.add(newState);
+			/**************************** PASSO 2 da União - Primeiro estado ****************************/
+			/**************************** Criar o primeiro elemento da união  ****************************/
+			int positionStart = logicState.findChainStart(conversion.statesList);
 
-		/**************************** PASSO 2 da União - Primeiro estado ****************************/
-		/**************************** Criar o primeiro elemento da união  ****************************/
+			/* Crio vetor auxiliar */
+			ArrayList<State> auxStateList = new ArrayList<State>();
+			newState = new State(conversion.statesList.get(positionStart).getName(),
+					"L", 
+					new State(conversion.statesList.get(positionStart+1).getName())
+					);
+			newState.setChainStart(true);
+			newState.setUnionStart(true);
+			auxStateList.add(newState);
+
+			/**************************** PASSO 3 da União - Recortar ****************************/
+			/**************************** Recorta do vetor principal para o auxiliar  ****************************/
+			boolean control = true;
+			while(control) {
+
+				if(positionStart == conversion.statesList.size()) {
+					control = false;
+				}else {
+					auxStateList.add(conversion.statesList.get(positionStart));
+					conversion.statesList.remove(positionStart);
+				}
+			}
+			/* Troco o chain start pro primeiro da união */
+			auxStateList.get(1).setChainStart(false);
+
+
+			/**************************** PASSO 4 da União - Renomear ****************************/
+			/**************************** Recorta do vetor principal para o auxiliar  ****************************/
+			for (int j = 1; j < auxStateList.size(); j++) {
+				auxStateList.get(j).setName(auxStateList.get(j).getName()+1);
+			}
+
+			for (int j = 1; j < auxStateList.size(); j++) {
+				for (int j2 = 0; j2 < auxStateList.get(j).getNextState().size(); j2++) {
+					if (auxStateList.get(j).getNextState().get(j2).getName() >= 0 && !auxStateList.get(j).getNextState().get(j2).isUnionEnd() ) {
+						auxStateList.get(j).setNextStateName(j2, (auxStateList.get(j).getNextStateName(j2))+1);
+					}
+				}
+			}
+
+			/**************************** PASSO 5 da União - Fuuuusão HA ****************************/
+			/**************************** Funde o auxiliar com o principal  ****************************/
+			conversion.statesList.addAll(auxStateList);
+			/* Verifico e marco o menor UnionStart e o maior UnionEnd  */
+			conversion.statesList = conversion.fixUnionStartAndEnd(conversion.statesList);
+			return conversion;
+			
+		}
+		
+		
+	}
+
+	public ConversionER specialUnion(ConversionER conversion) {
+		State newState = new State();
+		State logicState = new State();
+		
+		/**************************** PASSO 1 da União Especial - Primeiro estado ****************************/
+		/**************************** Criar o vetor auxiliar  ****************************/
+		/* Procuro o chain end para começar o vetor auxiliar a partir do nome dele */
+		int positionStartAux = logicState.findChainEnd(conversion.statesList);
+		
+		/* Procuro o chain start para copiar e alterar a transição*/
 		int positionStart = logicState.findChainStart(conversion.statesList);
+		String transitionValue = logicState.findSpecialTransition(conversion.statesList.get(positionStart), conversion.statesList.get(positionStartAux).getName());
 
 		/* Crio vetor auxiliar */
 		ArrayList<State> auxStateList = new ArrayList<State>();
-		newState = new State(conversion.statesList.get(positionStart).getName(),
-				"L", 
-				new State(conversion.statesList.get(positionStart+1).getName())
-				);
-		newState.setChainStart(true);
-		newState.setUnionStart(true);
+		newState = new State(conversion.statesList.get(positionStartAux).getName(),
+							transitionValue, 
+							new State(conversion.statesList.get(positionStartAux).getName()+1)
+							);
 		auxStateList.add(newState);
-
+		
 		/**************************** PASSO 3 da União - Recortar ****************************/
 		/**************************** Recorta do vetor principal para o auxiliar  ****************************/
 		boolean control = true;
@@ -196,29 +265,15 @@ public class ConversionER {
 		}
 		/* Troco o chain start pro primeiro da união */
 		auxStateList.get(1).setChainStart(false);
-
-
-		/**************************** PASSO 4 da União - Renomear ****************************/
-		/**************************** Recorta do vetor principal para o auxiliar  ****************************/
-		for (int j = 1; j < auxStateList.size(); j++) {
-			auxStateList.get(j).setName(auxStateList.get(j).getName()+1);
-		}
-
-		for (int j = 1; j < auxStateList.size(); j++) {
-			for (int j2 = 0; j2 < auxStateList.get(j).getNextState().size(); j2++) {
-				if (auxStateList.get(j).getNextState().get(j2).getName() >= 0 && !auxStateList.get(j).getNextState().get(j2).isUnionEnd() ) {
-					auxStateList.get(j).setNextStateName(j2, (auxStateList.get(j).getNextStateName(j2))+1);
-				}
-			}
-		}
-
-		/**************************** PASSO 5 da União - Fuuuusão HA ****************************/
-		/**************************** Funde o auxiliar com o principal  ****************************/
-		conversion.statesList.addAll(auxStateList);
-		/* Verifico e marco o menor UnionStart e o maior UnionEnd  */
-		conversion.statesList = conversion.fixUnionStartAndEnd(conversion.statesList);
-		return conversion;
 		
+		/* Pegar o nextState do chainStart (que aponta para o menor da frente) */
+		/* Ir recortando e colando no auxiliar até o chainEnd (ou fim do vetor) */
+		/* Depois de recortar tratar a adição no final */
+		/* Talvez somar +1 em todos após o primeiro do vetor aux */
+		/* Retornar para o segunda perna da união */
+		
+		
+		return conversion;
 	}
 	
 	public ConversionER foundStarKey(ConversionER conversion, int i, String expression){

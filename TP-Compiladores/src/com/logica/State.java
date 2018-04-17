@@ -226,4 +226,16 @@ public class State {
 		}
 		return -1;
 	}
+
+	public String findSpecialTransition(State state, int endName) {
+		
+		for (int i = 0; i < state.getNextState().size(); i++) {
+			if(state.getNextState().get(i).getName() == endName) {
+				String newTransition = state.getItemToChange().get(i);
+				state.getTransition().set(i,"L");
+				return newTransition;
+			}
+		}
+		return "Erro";
+	}
 }
