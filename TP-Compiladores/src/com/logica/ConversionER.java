@@ -128,6 +128,26 @@ public class ConversionER {
 				}
 			}
 			
+			else if(expression.charAt(i) == '(') {
+				/****************************************************** PASSO5 - '(' RECURSAO CARAIO ******************************************************/
+				ArrayList<State> auxStateList = new ArrayList<State>();
+				ConversionER auxiliar = new ConversionER();
+				
+				/* Utilizo uma lista auxiliar para receber o resultado da recursão */
+				auxStateList = mainList.logicFunction(auxiliar, expression.substring(i+1, expression.length())).statesList;
+				
+				/* Funde as duas listas */
+				mainList.statesList.addAll(auxStateList);
+				
+				/* Seta i com a posição da palavra em que foi terminada a lógica de recursão */
+				for (int k = i+1; k < expression.length(); k++) {
+					if (expression.charAt(k) == ')') {
+						i = k;
+						k = expression.length();
+					}
+				}
+			}
+			
 			else if(expression.charAt(i) == 'U') {
 				/****************************************************** PASSO3 - 'aU' ADD FIM INICIO ******************************************************/
 				mainList = mainList.foundUnion(mainList, i, expression);
@@ -136,6 +156,11 @@ public class ConversionER {
 			else if(expression.charAt(i) == '*') {
 				/****************************************************** PASSO4 - 'a*' ADD FIM INICIO ******************************************************/
 				mainList = mainList.foundStarKey(mainList, i, expression);
+			}
+			
+			else if(expression.charAt(i) == ')') {
+				/****************************************************** PASSO6 - ')' RETORNA RECURSAO CARAIO ******************************************************/
+				return mainList;
 			}
 			
 			else {
@@ -377,7 +402,6 @@ public class ConversionER {
 			/* Caso houver o link - vou setar a variável de hasLink como true e impedir que essa ligação seja duplicada */
 			boolean hasLink = false;
 			for (int k = 0; k < auxStateList.get(0).getNextState().size(); k++) {
-				auxStateList.get(0).printState();
 				if (auxStateList.get(0).getNextState().get(k).getName() == auxStateList.get(auxStateList.size()-1).getName()) {
 					hasLink = true;
 				}
