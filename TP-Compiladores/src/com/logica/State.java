@@ -1,5 +1,8 @@
 package com.logica;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class State {
@@ -111,6 +114,7 @@ public class State {
 		}
 		for (int i = 0; i < this.getItemToChange().size(); i++) {
 			System.out.println("q"+this.getName() + " -" + this.getItemToChange().get(i) + "> " + "q"+this.getNextState().get(i).getName());
+			
 		}
 	}
 	

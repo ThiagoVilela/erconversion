@@ -1,12 +1,20 @@
 package com.logica;
 
+
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Scanner;
+
+import javax.annotation.processing.SupportedSourceVersion;
 
 public class ConversionER {
 	/* Atributos */
 	public ArrayList<State> statesList = new ArrayList<State>();
 	public String expression;
+	
+	
 
 	public static void main(String[] args) {
 		ConversionER conversion = new ConversionER();
@@ -42,6 +50,8 @@ public class ConversionER {
 			} 
 			conversion.statesList.get(i).printState();
 		}
+		
+		conversion.writeGraphviz(conversion);
 	}
 
 	public ConversionER logicFunction(ConversionER mainList, String expression) {
@@ -272,6 +282,7 @@ public class ConversionER {
 		
 		/* Procuro a referencia do insideUnion antes do ChainEnd */
 		int insideUnionPosition = -1;
+		/* inside union -1 porque depois de adicionar um specialKleene or union - voce colocar o UE na frente dos anteriores*/
 		for (int i = positionStart; i < conversion.statesList.size(); i++) {
 			if (conversion.statesList.get(i).isInsideUnion()) {
 				insideUnionPosition = i;
@@ -281,36 +292,66 @@ public class ConversionER {
 		
 		/* Valor da transição do unionEnd para o novo chainEnd*/
 		//String transitionValue = logicState.findSpecialTransition(conversion.statesList.get(positionStart), conversion.statesList.get(positionStartAux).getName());
-
+		
 		/* Crio vetor auxiliar */
 		ArrayList<State> auxStateList = new ArrayList<State>();
-		newState = new State(conversion.statesList.get(positionStart).getName(),
+		
+		
+		
+		if (insideUnionPosition > -1) {
+			
+			newState = new State(conversion.statesList.get(positionStart).getName(),
 							"L", 
 							new State(conversion.statesList.get(insideUnionPosition).getName()+1)
 							);
-		newState.setChainStart(conversion.statesList.get(positionStart).isChainStart());
-		newState.setUnionStart(conversion.statesList.get(positionStart).isUnionStart());
-		newState.setUnionEnd(conversion.statesList.get(positionStart).isUnionEnd());
-		newState.printState();
-		auxStateList.add(newState);
-		
-		/**************************** PASSO 3 da União - Recortar ****************************/
-		/**************************** Recorta do vetor principal para o auxiliar  ****************************/
-		boolean control = true;
-		boolean firstCut = false;
-		while(control) {
-			if(!firstCut) {
-				auxStateList.add(conversion.statesList.get(positionStart));
-				conversion.statesList.remove(positionStart);
-				firstCut = true;
+			newState.setChainStart(conversion.statesList.get(positionStart).isChainStart());
+			newState.setUnionStart(conversion.statesList.get(positionStart).isUnionStart());
+			newState.setUnionEnd(conversion.statesList.get(positionStart).isUnionEnd());
+			newState.printState();
+			auxStateList.add(newState); 
+			
+			/**************************** PASSO 3 da União - Recortar ****************************/
+			/**************************** Recorta do vetor principal para o auxiliar  ****************************/
+			boolean control = true;
+			boolean firstCut = false;
+			while(control) {
+				if(!firstCut) {
+					auxStateList.add(conversion.statesList.get(positionStart));
+					conversion.statesList.remove(positionStart);
+					firstCut = true;
+				}
+				if(insideUnionPosition == conversion.statesList.size()) {
+					control = false;
+				}else {
+					auxStateList.add(conversion.statesList.get(insideUnionPosition));
+					conversion.statesList.remove(insideUnionPosition);
+				}
 			}
-			if(insideUnionPosition == conversion.statesList.size()) {
-				control = false;
-			}else {
-				auxStateList.add(conversion.statesList.get(insideUnionPosition));
-				conversion.statesList.remove(insideUnionPosition);
+		} 
+		
+		else {
+			newState = new State(conversion.statesList.get(positionStart).getName(),
+							"L", 
+							new State(conversion.statesList.get(positionStart+1).getName())
+							);
+			newState.setChainStart(conversion.statesList.get(positionStart).isChainStart());
+			newState.setUnionStart(conversion.statesList.get(positionStart).isUnionStart());
+			newState.setUnionEnd(conversion.statesList.get(positionStart).isUnionEnd());
+			newState.printState();
+			auxStateList.add(newState); 
+			
+			boolean control = true;
+			while(control) {
+				if(positionStart == conversion.statesList.size()) {
+					control = false;
+				}else {
+					auxStateList.add(conversion.statesList.get(positionStart));
+					conversion.statesList.remove(positionStart);
+				}
 			}
 		}
+		
+		
 		/* Troco o chain start pro primeiro da união */
 		
 		
@@ -859,6 +900,30 @@ public class ConversionER {
 	public State linkStayKeyState(State state) {
 		
 		return state;
+	}
+
+	public void writeGraphviz(ConversionER conversion) {
+		FileWriter arquivo;
+		
+		for (int i = 0; i < conversion.statesList.size(); i++) {
+			for (int j = 0; j < conversion.statesList.get(i).getItemToChange().size(); j++) {
+				try {
+					
+					arquivo = new FileWriter(new File("imprimirAbagacaDeCompiladores.dot"),true);
+					arquivo.write("q"+conversion.statesList.get(i).getName() + " -" + 
+							conversion.statesList.get(i).getItemToChange().get(j) + "> " + 
+							"q"+conversion.statesList.get(i).getNextState().get(j).getName() + ""  );
+					
+					arquivo.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+
+
+			}
+		}
 	}
 }
 
