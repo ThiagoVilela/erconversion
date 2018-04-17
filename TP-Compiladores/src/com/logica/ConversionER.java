@@ -323,6 +323,8 @@ public class ConversionER {
 						new State(conversion.statesList.get(positionStart+1).getName())
 						);
 		
+		/**************************** PASSO 3.1 do Kleene - Transfere os nextStates****************************/
+		/**************************** Os nexts do antigo inicial pro novo inicial ****************************/
 		/* Adiciona o nextState diferente do novo inicial e remove os do antigo inicial */
 		for (int j2 = 0; j2 < conversion.statesList.get(positionStart).getNextState().size(); j2++) {
 			if (newState.getNextState().get(0).getName() != conversion.statesList.get(positionStart).getNextState().get(j2).getName()) {
