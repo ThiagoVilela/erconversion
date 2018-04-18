@@ -307,7 +307,6 @@ public class ConversionER {
 			newState.setChainStart(conversion.statesList.get(positionStart).isChainStart());
 			newState.setUnionStart(conversion.statesList.get(positionStart).isUnionStart());
 			newState.setUnionEnd(conversion.statesList.get(positionStart).isUnionEnd());
-			newState.printState();
 			auxStateList.add(newState); 
 			
 			/**************************** PASSO 3 da União - Recortar ****************************/
@@ -337,7 +336,6 @@ public class ConversionER {
 			newState.setChainStart(conversion.statesList.get(positionStart).isChainStart());
 			newState.setUnionStart(conversion.statesList.get(positionStart).isUnionStart());
 			newState.setUnionEnd(conversion.statesList.get(positionStart).isUnionEnd());
-			newState.printState();
 			auxStateList.add(newState); 
 			
 			boolean control = true;
@@ -687,9 +685,6 @@ public class ConversionER {
 		boolean firstCut = false;
 		
 		if (conversion.statesList.get(positionStart).getName() < conversion.statesList.get(positionStart-1).getName() ) {
-			System.out.println();
-			System.out.println("ENTREI NO IF DA PERNA DEBAIXO!!!!!");
-			System.out.println();
 			
 			newState = new State(conversion.statesList.get(positionStart).getName(),
 					"L", 
@@ -716,9 +711,6 @@ public class ConversionER {
 				}
 			}
 			
-			System.out.println("VOU DISTRIBUIR PRO PIMEIROOOO");
-			conversion.printTudo(auxStateList);
-			
 			/**************************** PASSO 4 da União - Redistribuir as ligações menores pro inicial ****************************/
 			/**************************** Passa as ligações adiante  ****************************/
 			for (int i = 0; i < auxStateList.get(0).getNextState().size(); i++) {
@@ -737,16 +729,11 @@ public class ConversionER {
 				}
 			}
 			
-			System.out.println("PASSEI NEXT DO Q1 PRO Q0");
-			conversion.printTudo(auxStateList);
-			
 			/* Adciona estado final e linka o antigo final para ele */
 			auxStateList.set(auxStateList.size()-1, logicState.swapFinalLink((auxStateList.get(auxStateList.size()-1)), 
 																				'L', 
 																				auxStateList.get(auxStateList.size()-1).getName()+1)
 																				);
-			System.out.println("FIZ O SWAPAO!");
-			conversion.printTudo(auxStateList);
 			
 			/* Tira o link para antigo union end - e redireciona para o novo estado final do kleene */
 			for (int i = 0; i < auxStateList.get(auxStateList.size()-1).getNextState().size(); i++) {
@@ -941,10 +928,6 @@ public class ConversionER {
 				auxStateList.get(0).addItemtoChange("L");
 			}
 		}
-
-		System.out.println("ESTOOOOU NO AUXILIAAAAR");
-		conversion.printTudo(auxStateList);
-		System.out.println("EU IMPRIMI!");
 		
 		/**************************** PASSO 6 do Kleene - Fuuuusão HA ****************************/
 		/**************************** Funde o auxiliar com o principal  ****************************/
