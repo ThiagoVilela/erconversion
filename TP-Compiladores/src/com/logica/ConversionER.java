@@ -13,8 +13,7 @@ public class ConversionER {
 	/* Atributos */
 	public ArrayList<State> statesList = new ArrayList<State>();
 	public String expression;
-	
-	
+
 
 	public static void main(String[] args) {
 		ConversionER conversion = new ConversionER();
@@ -39,18 +38,28 @@ public class ConversionER {
 		for (int i = 0; i < conversion.statesList.size(); i++) {
 			if (conversion.statesList.get(i).isChainStart()) {
 				System.out.println("ESSE EMBAIXO E CHAIN START!");
-			} if (conversion.statesList.get(i).isChainEnd()) {
+			} 
+			if (conversion.statesList.get(i).isChainEnd()) {
 				System.out.println("ESSE EMBAIXO E CHAIN END!");
-			}  if (conversion.statesList.get(i).isUnionStart()) {
+			}  
+			if (conversion.statesList.get(i).isUnionStart()) {
 				System.out.println("ESSE EMBAIXO E UNION START!");
-			}  if (conversion.statesList.get(i).isUnionEnd()) {
+			}  
+			if (conversion.statesList.get(i).isUnionEnd()) {
 				System.out.println("ESSE EMBAIXO E UNION END!");
-			} 	if (conversion.statesList.get(i).isInsideUnion()) {
+			} 	
+			if (conversion.statesList.get(i).isInsideUnion()) {
 				System.out.println("ESSE EMBAIXO E INSIDE UNION!");
 			} 
+			if (conversion.statesList.get(i).isLeftStart()) {
+				System.out.println("ESSE EMBAIXO E POS PARENTESE ESQUERDO");
+			}
+			if (conversion.statesList.get(i).isRightEnd()) {
+				System.out.println("ESSE EMBAIXO E POS PARENTESE ESQUERDO");
+			}
 			conversion.statesList.get(i).printState();
 		}
-		
+
 		conversion.writeGraphviz(conversion);
 	}
 
@@ -81,36 +90,36 @@ public class ConversionER {
 					newState.setChainEnd(true);
 					mainList.statesList.add(newState);
 				}
-				
+
 				else if(mainList.statesList.size() > 0) {
 					/* Encontro os ChainStart e ChainEnd para a lógica */
 					int positionStart = logicState.findChainStart(mainList.statesList);
 					int positionEnd = logicState.findChainEnd(mainList.statesList);
-					
+
 					/**************************** PASSO 6.1 da União - Segunda perna! ****************************/
 					/**************************** Adiciona o segundo no tutz tutz!  ****************************/
 					if(mainList.statesList.get(mainList.getLastState()).isUnionEnd()) {
-						
+
 						/* Uso o ChainStart*/
 						/* Crio um novo estado - que será linkado pelo primeiro */
 						newState = new State(mainList.statesList.size(),
-											Character.toString(expression.charAt(i)), 
-											new State(mainList.statesList.size()+1)
-											);
+								Character.toString(expression.charAt(i)), 
+								new State(mainList.statesList.size()+1)
+								);
 						mainList.statesList.add(newState);
-						
+
 						/* Linko o UnionStart no novo estado */
 						mainList.statesList.get(positionStart).addNextState(new State(mainList.statesList.size()-1));
 						mainList.statesList.get(positionStart).addItemtoChange("L");
-						
+
 						/* Crio o novo estado final já linkado no union end */
 						newState = new State(mainList.statesList.size(),
-											"L", 
-											new State(mainList.statesList.get(positionEnd).getName())
-											);
+								"L", 
+								new State(mainList.statesList.get(positionEnd).getName())
+								);
 						newState.setInsideUnion(true);
 						mainList.statesList.add(newState);
-						
+
 					}
 					/****************************************************** PASSO2 - 'aa' LINKA O CHAINEND ******************************************************/
 					else {
@@ -125,9 +134,9 @@ public class ConversionER {
 
 						/* Crio o novo estado final */
 						newState = new State(mainList.statesList.size(),
-											"F", 
-											new State((-1))
-											);
+								"F", 
+								new State((-1))
+								);
 						newState.setChainEnd(true);
 						mainList.statesList.add(newState);
 
@@ -137,18 +146,35 @@ public class ConversionER {
 					}
 				}
 			}
-			
+
+			else if(expression.charAt(i) == 'U') {
+				/****************************************************** PASSO3 - 'aU' ADD FIM INICIO ******************************************************/
+				if (mainList.statesList.get(mainList.getLastState()).isRightEnd()) {
+				// TO DO
+				}
+				else {
+					mainList = mainList.foundUnion(mainList, i, expression);
+				}
+			}
+
+			else if(expression.charAt(i) == '*') {
+				/****************************************************** PASSO4 - 'a*' ADD FIM INICIO ******************************************************/
+				mainList = mainList.foundStarKey(mainList, i, expression);
+			}
+
 			else if(expression.charAt(i) == '(') {
 				/****************************************************** PASSO5 - '(' RECURSAO CARAIO ******************************************************/
 				ArrayList<State> auxStateList = new ArrayList<State>();
 				ConversionER auxiliar = new ConversionER();
-				
+
 				/* Utilizo uma lista auxiliar para receber o resultado da recursão */
 				auxStateList = mainList.logicFunction(auxiliar, expression.substring(i+1, expression.length())).statesList;
-				
+				/* Marco os estados iniciais e finais pós operação em um parêntese */
+				auxStateList = mainList.parenthesisStartAndEnd(auxStateList);
+
 				/* Funde as duas listas */
 				mainList.statesList.addAll(auxStateList);
-				
+
 				/* Seta i com a posição da palavra em que foi terminada a lógica de recursão */
 				for (int k = i+1; k < expression.length(); k++) {
 					if (expression.charAt(k) == ')') {
@@ -157,22 +183,12 @@ public class ConversionER {
 					}
 				}
 			}
-			
-			else if(expression.charAt(i) == 'U') {
-				/****************************************************** PASSO3 - 'aU' ADD FIM INICIO ******************************************************/
-				mainList = mainList.foundUnion(mainList, i, expression);
-			}
-			
-			else if(expression.charAt(i) == '*') {
-				/****************************************************** PASSO4 - 'a*' ADD FIM INICIO ******************************************************/
-				mainList = mainList.foundStarKey(mainList, i, expression);
-			}
-			
+
 			else if(expression.charAt(i) == ')') {
 				/****************************************************** PASSO6 - ')' RETORNA RECURSAO CARAIO ******************************************************/
 				return mainList;
 			}
-			
+
 			else {
 				System.out.println("Erro na criação do estado");
 			}
@@ -181,26 +197,26 @@ public class ConversionER {
 		return mainList;
 
 	}
-	
+
 	public ConversionER foundUnion(ConversionER conversion, int i, String expression) {
-		
+
 		State logicState = new State();
 		State newState = new State();
-		
+
 		/* Pego a posição do chainstart e verifico se ele é também union end */
 		if (conversion.statesList.get(logicState.findChainStart(conversion.statesList)).isUnionEnd()) {
 			return conversion.specialUnion(conversion);
 		}
-		
+
 		else {
 			/**************************** PASSO 1 da União - Ultimo estado ****************************/
 			/**************************** Adiciono último estado e linko o antigo para ele ****************************/
 			int positionEnd = logicState.findChainEnd(conversion.statesList);
-			
+
 			/* Faço o chain end linkar no novo estado final e tiro o chainend */
 			conversion.statesList.set(positionEnd, logicState.swapFinalLink(conversion.statesList.get(positionEnd), 
-																			'L', 
-																			conversion.statesList.size()));
+					'L', 
+					conversion.statesList.size()));
 			conversion.statesList.get(positionEnd).setChainEnd(false);
 
 			/* Crio o novo estado final */
@@ -262,24 +278,24 @@ public class ConversionER {
 			/* Verifico e marco o menor UnionStart e o maior UnionEnd  */
 			//conversion.statesList = conversion.fixUnionStartAndEnd(conversion.statesList);
 			return conversion;
-			
+
 		}
-		
-		
+
+
 	}
 
 	public ConversionER specialUnion(ConversionER conversion) {
 		State newState = new State();
 		State logicState = new State();
-		
+
 		/**************************** PASSO 1 da União Especial - Primeiro estado ****************************/
 		/**************************** Criar o vetor auxiliar  ****************************/
 		/* Procuro o chain end para começar o vetor auxiliar a partir do nome dele */
 		//int positionStartAux = logicState.findChainEnd(conversion.statesList);
-		
+
 		/* Procuro o chain start para copiar e alterar a transição*/
 		int positionStart = logicState.findChainStart(conversion.statesList);
-		
+
 		/* Procuro a referencia do insideUnion antes do ChainEnd */
 		int insideUnionPosition = -1;
 		/* inside union -1 porque depois de adicionar um specialKleene or union - voce colocar o UE na frente dos anteriores*/
@@ -289,26 +305,26 @@ public class ConversionER {
 				i = conversion.statesList.size();
 			}
 		}
-		
+
 		/* Valor da transição do unionEnd para o novo chainEnd*/
 		//String transitionValue = logicState.findSpecialTransition(conversion.statesList.get(positionStart), conversion.statesList.get(positionStartAux).getName());
-		
+
 		/* Crio vetor auxiliar */
 		ArrayList<State> auxStateList = new ArrayList<State>();
-		
-		
-		
+
+
+
 		if (insideUnionPosition > -1) {
-			
+
 			newState = new State(conversion.statesList.get(positionStart).getName(),
-							"L", 
-							new State(conversion.statesList.get(insideUnionPosition).getName()+1)
-							);
+					"L", 
+					new State(conversion.statesList.get(insideUnionPosition).getName()+1)
+					);
 			newState.setChainStart(conversion.statesList.get(positionStart).isChainStart());
 			newState.setUnionStart(conversion.statesList.get(positionStart).isUnionStart());
 			newState.setUnionEnd(conversion.statesList.get(positionStart).isUnionEnd());
 			auxStateList.add(newState); 
-			
+
 			/**************************** PASSO 3 da União - Recortar ****************************/
 			/**************************** Recorta do vetor principal para o auxiliar  ****************************/
 			boolean control = true;
@@ -327,17 +343,17 @@ public class ConversionER {
 				}
 			}
 		} 
-		
+
 		else {
 			newState = new State(conversion.statesList.get(positionStart).getName(),
-							"L", 
-							new State(conversion.statesList.get(positionStart+1).getName())
-							);
+					"L", 
+					new State(conversion.statesList.get(positionStart+1).getName())
+					);
 			newState.setChainStart(conversion.statesList.get(positionStart).isChainStart());
 			newState.setUnionStart(conversion.statesList.get(positionStart).isUnionStart());
 			newState.setUnionEnd(conversion.statesList.get(positionStart).isUnionEnd());
 			auxStateList.add(newState); 
-			
+
 			boolean control = true;
 			while(control) {
 				if(positionStart == conversion.statesList.size()) {
@@ -348,40 +364,40 @@ public class ConversionER {
 				}
 			}
 		}
-		
-		
+
+
 		/* Troco o chain start pro primeiro da união */
-		
-		
+
+
 		/**************************** PASSO 4 da União - Redistribuir as ligações menores pro inicial ****************************/
 		/**************************** Passa as ligações adiante  ****************************/
 		for (int i = 0; i < auxStateList.get(0).getNextState().size(); i++) {
 			for (int j = 0; j < auxStateList.get(1).getNextState().size(); j++) {
 				if (auxStateList.get(0).getNextState().get(i).getName() != auxStateList.get(1).getNextState().get(j).getName() 
 						&& (auxStateList.get(0).getNextState().get(i).getName() < auxStateList.get(2).getName())) {
-					
+
 					auxStateList.get(0).getNextState().add(new State(auxStateList.get(1).getNextState().get(j).getName()));
 					auxStateList.get(0).getItemToChange().add(auxStateList.get(1).getItemToChange().get(j));
-					
+
 					auxStateList.get(1).getNextState().remove(j);
 					auxStateList.get(1).getItemToChange().remove(j);
-					
+
 				}
 			}
 		}
-		
+
 		/* Adciona estado final e linka o antigo final para ele */
 		auxStateList.set(auxStateList.size()-1, logicState.swapFinalLink((auxStateList.get(auxStateList.size()-1)), 
-																			'L', 
-																			auxStateList.get(auxStateList.size()-1).getName()+1)
-																			);
+				'L', 
+				auxStateList.get(auxStateList.size()-1).getName()+1)
+				);
 		/* Adiciona o estado final */
 		newState = new State((auxStateList.get(auxStateList.size()-1).getName()+1),
-							"F", 
-							new State(-1)
-							);
+				"F", 
+				new State(-1)
+				);
 		auxStateList.add(newState);
-		
+
 		/**************************** PASSO 5 a União - Renomear ****************************/
 		/**************************** Renomeia a pora toda do vetor principal para o auxiliar  ****************************/
 		/* Troco os nomes */
@@ -397,7 +413,7 @@ public class ConversionER {
 				}
 			}
 		}
-		
+
 		/* Pegar o nextState do chainStart (que aponta para o menor da frente) */
 		/* Ir recortando e colando no auxiliar até o chainEnd (ou fim do vetor) */
 		/* Depois de recortar tratar a adição no final */
@@ -408,7 +424,7 @@ public class ConversionER {
 				auxStateList.get(i).setChainStart(true);
 				auxStateList.get(i).setUnionStart(true);
 			}
-			
+
 			else if(i==auxStateList.size()-1) {
 				auxStateList.get(i).setChainStart(false);
 				auxStateList.get(i).setUnionStart(false);
@@ -422,32 +438,32 @@ public class ConversionER {
 				auxStateList.get(i).setUnionEnd(false);
 			}
 		}
-		
+
 		/**************************** PASSO 5 da União - Fuuuusão HA ****************************/
 		/**************************** Funde o auxiliar com o principal  ****************************/
 		conversion.statesList.addAll(auxStateList);
 		/* Verifico e marco o menor UnionStart e o maior UnionEnd  */
 		//conversion.statesList = conversion.fixUnionStartAndEnd(conversion.statesList);
-		
+
 		return conversion;
 	}
-	
+
 	public ConversionER foundStarKey(ConversionER conversion, int i, String expression){
 		State logicState = new State();
 		State newState = new State();
 		//Read reader = new Read();
-		
+
 		if (conversion.statesList.get(logicState.findChainStart(conversion.statesList)).isUnionEnd()) {
 			return conversion.specialStarKey(conversion);
 		}
-		
+
 		else {
 			/**************************** PASSO 6.1 do Kleene - Alterar letra interna a união ****************************/
 			/**************************** Ve se o último elemento pertence a uma união e procura o chainEnd  ****************************/
 			if (conversion.statesList.get(conversion.getLastState()).isInsideUnion()){ 
 				/* Acho o chain end para percorrer e recortar até o unionInside */
 				int positionEndUnionEnd = logicState.findChainEnd(conversion.statesList); /* Salvo o antigo positionEnd com UnionEnd*/
-				
+
 				/**************************** PASSO 1.1 do Kleene - Removo o link do CE do último estado ****************************/
 				/**************************** E linko ele para o novo último ****************************/
 				/* Retiro os links do InsideUnion para o elemento CE e UE */
@@ -460,33 +476,33 @@ public class ConversionER {
 						conversion.statesList.get(conversion.getLastState()).getItemToChange().add("L");
 					}
 				}
-				
+
 				/**************************** PASSO 2.1 do Kleene - Ultimo estado ****************************/
 				/**************************** Adiciono último estado e linko o antigo para ele ****************************/
 				/* Crio o novo estado final */
 				newState = new State(conversion.statesList.size(),
-										"F", 
-										new State(-1)
-										);
+						"F", 
+						new State(-1)
+						);
 				newState.setInsideUnion(true);
 				/* Linko o novo final no 'atual inicial' de ação com Kleene */
 				newState.addItemtoChange("L");
 				newState.addNextState(new State(conversion.statesList.get(positionEndUnionEnd+1).getName()));
 				/* Adiciono na lista */
 				conversion.statesList.add(newState);
-				
-				
+
+
 				/**************************** PASSO 3.1 do Kleene - Recorto pro AUX****************************/
 				/**************************** Começou o ctrl+x ****************************/
 				ArrayList<State> auxStateList = new ArrayList<State>();
-				
+
 				/* Adiciono o novo inicial no auxiliar */
 				//newState = new State();
 				newState = new State(conversion.statesList.get(positionEndUnionEnd+1).getName(),
-										"L", 
-										new State(conversion.statesList.get(positionEndUnionEnd+2).getName())
-										);
-				
+						"L", 
+						new State(conversion.statesList.get(positionEndUnionEnd+2).getName())
+						);
+
 				/**************************** PASSO 3.2 do Kleene - Transfere os nextStates****************************/
 				/**************************** Os nexts do antigo inicial pro novo inicial ****************************/
 				/* Adiciona o nextState diferente do novo inicial e remove os do antigo inicial */
@@ -498,10 +514,10 @@ public class ConversionER {
 						conversion.statesList.get(positionEndUnionEnd+1).getItemToChange().remove(j2);
 					}
 				}
-				
+
 				/* Adiciono novo state com estados adicionados */
 				auxStateList.add(newState);
-				
+
 				/* Recorto do original pro auxiliar */
 				boolean control = true;
 				while(control) {
@@ -512,7 +528,7 @@ public class ConversionER {
 						conversion.statesList.remove(positionEndUnionEnd+1);
 					}
 				}
-				
+
 				/**************************** PASSO 4 do Kleene - Renomear ****************************/
 				/**************************** Renomeia a pora toda do vetor principal para o auxiliar  ****************************/
 				/* Troco os nomes */
@@ -527,7 +543,7 @@ public class ConversionER {
 						}
 					}
 				}
-				
+
 				/**************************** PASSO 5 do Kleene - Linkar o CS com o CE ****************************/
 				/**************************** Linka lá no fim saporra  ****************************/
 				/* Adição da nova transição do novo incial pro novo final do vetor aux */
@@ -539,7 +555,7 @@ public class ConversionER {
 						hasLink = true;
 					}
 				}
-				
+
 				/**************************** PASSO 6 do Kleene - Linkar o último elemento com o UnionEnd ****************************/
 				/**************************** Linka lá no fim da união de riba!  ****************************/
 				/* Adição da nova transição do novo incial pro novo final do vetor aux */
@@ -548,59 +564,59 @@ public class ConversionER {
 					auxStateList.get(0).addNextState(new State(auxStateList.get(auxStateList.size()-1).getName()));
 					auxStateList.get(0).addItemtoChange("L");
 				}
-				
+
 				auxStateList.set(auxStateList.size()-1, logicState.swapFinalLink((auxStateList.get(auxStateList.size()-1)), 
-																				'L', 
-																				positionEndUnionEnd)
-								);
-				
+						'L', 
+						positionEndUnionEnd)
+						);
+
 				/**************************** PASSO 7 do Kleene - Fuuuusão HA ****************************/
 				/**************************** Funde o auxiliar com o principal  ****************************/
 				/* Adição do vetor auxiliar no original */
 				conversion.statesList.addAll(auxStateList);
 				return conversion;
 			}
-			
+
 			else {
 				/**************************** PASSO 1 do Kleene - Ultimo estado ****************************/
 				/**************************** Adiciono último estado e linko o antigo para ele ****************************/
 				int positionEnd = logicState.findChainEnd(conversion.statesList);
-				
+
 				/* Faço o chain end linkar no novo estado final e tiro o chainend */
 				conversion.statesList.set(positionEnd, logicState.swapFinalLink(conversion.statesList.get(positionEnd), 
-																				'L', 
-																				conversion.statesList.size()));
+						'L', 
+						conversion.statesList.size()));
 				conversion.statesList.get(positionEnd).setChainEnd(false);
-				
+
 				/* Crio o novo estado final */
 				newState = new State(conversion.statesList.size(),
-										"F", 
-										new State((-1))
-										);
+						"F", 
+						new State((-1))
+						);
 				newState.setChainEnd(true);
 				conversion.statesList.add(newState);
-				
+
 				/**************************** PASSO 2 do Kleene - Linko o novo chainEnd no antigo(atual) chainStart ****************************/
 				/**************************** Linko o novo chainEnd no antigo(atual) chainStart ****************************/
 				int positionStart = logicState.findChainStart(conversion.statesList);
 				positionEnd = logicState.findChainEnd(conversion.statesList);
-						
+
 				/* adiciono o qce -L-> qcs */
 				conversion.statesList.get(positionEnd).addItemtoChange("L");
 				conversion.statesList.get(positionEnd).addNextState(new State(conversion.statesList.get(positionStart).getName()));
-				
-				
+
+
 				/**************************** PASSO 3 do Kleene - Recorto pro AUX****************************/
 				/**************************** Começou o ctrl+x ****************************/
 				ArrayList<State> auxStateList = new ArrayList<State>();
-				
+
 				/* Adiciono o novo inicial no auxiliar */
 				//newState = new State();
 				newState = new State(conversion.statesList.get(positionStart).getName(),
-								"L", 
-								new State(conversion.statesList.get(positionStart+1).getName())
-								);
-				
+						"L", 
+						new State(conversion.statesList.get(positionStart+1).getName())
+						);
+
 				/**************************** PASSO 3.1 do Kleene - Transfere os nextStates****************************/
 				/**************************** Os nexts do antigo inicial pro novo inicial ****************************/
 				/* Adiciona o nextState diferente do novo inicial e remove os do antigo inicial */
@@ -612,10 +628,10 @@ public class ConversionER {
 						conversion.statesList.get(positionStart).getItemToChange().remove(j2);
 					}
 				}
-				
+
 				newState.setChainStart(true);
 				auxStateList.add(newState);
-				
+
 				/* Recorto do original pro auxiliar */
 				boolean control = true;
 				while(control) {
@@ -627,7 +643,7 @@ public class ConversionER {
 					}
 				}
 				auxStateList.get(1).setChainStart(false);
-				
+
 				/**************************** PASSO 4 do Kleene - Renomear ****************************/
 				/**************************** Renomeia a pora toda do vetor principal para o auxiliar  ****************************/
 				/* Troco os nomes */
@@ -642,13 +658,13 @@ public class ConversionER {
 						}
 					}
 				}
-				
+
 				/**************************** PASSO 5 do Kleene - Linkar o CS com o CE ****************************/
 				/**************************** Linka lá no fim saporra  ****************************/
 				/* Adição da nova transição do novo incial pro novo final do vetor aux */
 				auxStateList.get(0).addNextState(new State(auxStateList.get(auxStateList.size()-1).getName()));
 				auxStateList.get(0).addItemtoChange("L");
-				
+
 				/**************************** PASSO 6 do Kleene - Fuuuusão HA ****************************/
 				/**************************** Funde o auxiliar com o principal  ****************************/
 				/* Adição do vetor auxiliar no original */
@@ -657,11 +673,11 @@ public class ConversionER {
 			}
 		}
 	}
-	
+
 	public ConversionER specialStarKey(ConversionER conversion) {
 		State logicState = new State();
 		State newState = new State();
-		
+
 		/* Procuro o chain start para copiar e alterar a transição*/
 		int positionStart = logicState.findChainStart(conversion.statesList);
 
@@ -673,19 +689,19 @@ public class ConversionER {
 				i = conversion.statesList.size();
 			}
 		}
-		
+
 		/* Procuro o chain start para copiar e alterar a transição*/
 		int positionEnd = logicState.findChainEnd(conversion.statesList);
 		int unionEndName = conversion.statesList.get(positionEnd).getName();
 
 		/* Crio vetor auxiliar */
 		ArrayList<State> auxStateList = new ArrayList<State>();
-		
+
 		boolean control = true;
 		boolean firstCut = false;
-		
+
 		if (conversion.statesList.get(positionStart).getName() < conversion.statesList.get(positionStart-1).getName() ) {
-			
+
 			newState = new State(conversion.statesList.get(positionStart).getName(),
 					"L", 
 					new State(conversion.statesList.get(positionEnd).getName()+1)
@@ -694,7 +710,7 @@ public class ConversionER {
 			newState.setUnionStart(conversion.statesList.get(positionStart).isUnionStart());
 			newState.setUnionEnd(conversion.statesList.get(positionStart).isUnionEnd());
 			auxStateList.add(newState);
-			
+
 			/**************************** PASSO 3 da União - Recortar ****************************/
 			/**************************** Recorta do vetor principal para o auxiliar  ****************************/
 			while(control) {
@@ -710,7 +726,7 @@ public class ConversionER {
 					conversion.statesList.remove(positionEnd);
 				}
 			}
-			
+
 			/**************************** PASSO 4 da União - Redistribuir as ligações menores pro inicial ****************************/
 			/**************************** Passa as ligações adiante  ****************************/
 			for (int i = 0; i < auxStateList.get(0).getNextState().size(); i++) {
@@ -718,37 +734,37 @@ public class ConversionER {
 					/* a logica de aUbcUd* - ta bugando! o 9 != 6 e 9 menor que 9 ta comendo! */
 					if (auxStateList.get(0).getNextState().get(i).getName() != auxStateList.get(1).getNextState().get(j).getName() 
 							&& (auxStateList.get(1).getNextState().get(j).getName() < auxStateList.get(2).getName())) {
-						
+
 						auxStateList.get(0).getNextState().add(new State(auxStateList.get(1).getNextState().get(j).getName()));
 						auxStateList.get(0).getItemToChange().add(auxStateList.get(1).getItemToChange().get(j));
-						
+
 						auxStateList.get(1).getNextState().remove(j);
 						auxStateList.get(1).getItemToChange().remove(j);
-						
+
 					}
 				}
 			}
-			
+
 			/* Adciona estado final e linka o antigo final para ele */
 			auxStateList.set(auxStateList.size()-1, logicState.swapFinalLink((auxStateList.get(auxStateList.size()-1)), 
-																				'L', 
-																				auxStateList.get(auxStateList.size()-1).getName()+1)
-																				);
-			
+					'L', 
+					auxStateList.get(auxStateList.size()-1).getName()+1)
+					);
+
 			/* Tira o link para antigo union end - e redireciona para o novo estado final do kleene */
 			for (int i = 0; i < auxStateList.get(auxStateList.size()-1).getNextState().size(); i++) {
 				if (auxStateList.get(auxStateList.size()-1).getNextState().get(i).getName() == unionEndName) {
 					auxStateList.get(auxStateList.size()-1).setNextStateName(i, auxStateList.get(auxStateList.size()-1).getName()+1);
 				}
 			}
-			
+
 			/* Adiciona o estado final e linko no fim da união */
 			newState = new State((auxStateList.get(auxStateList.size()-1).getName()+1),
-								"L", 
-								new State(unionEndName-1)
-								);
+					"L", 
+					new State(unionEndName-1)
+					);
 			auxStateList.add(newState);
-			
+
 			/**************************** PASSO 5 a União - Renomear ****************************/
 			/**************************** Renomeia a pora toda do vetor principal para o auxiliar  ****************************/
 			/* Troco os nomes */
@@ -764,13 +780,13 @@ public class ConversionER {
 					}
 				}
 			}
-			
+
 			/* Limpeza */
 			for (int i = 0; i < auxStateList.size(); i++) {
 				if (i==0) {
 					auxStateList.get(i).setChainStart(true);
 				}
-				
+
 				else if(i==auxStateList.size()-1) {
 					auxStateList.get(i).setChainStart(false);
 					auxStateList.get(i).setUnionStart(false);
@@ -786,11 +802,11 @@ public class ConversionER {
 					auxStateList.get(i).setInsideUnion(false);
 				}
 			}
-			
+
 			/* Linka o estado final para o antigo inicial */
 			auxStateList.get(auxStateList.size()-1).getNextState().add(new State(auxStateList.get(2).getName()));
 			auxStateList.get(auxStateList.size()-1).getItemToChange().add("L");
-			
+
 			/**************************** PASSO 5 do Kleene - Linkar o CS com o CE ****************************/
 			/**************************** Linka lá no fim saporra  ****************************/
 			/* Adição da nova transição do novo incial pro novo final do vetor aux */
@@ -802,7 +818,7 @@ public class ConversionER {
 					hasLink = true;
 				}
 			}
-			
+
 			/**************************** PASSO 6 do Kleene - Linkar o último elemento com o UnionEnd ****************************/
 			/**************************** Linka lá no fim da união de riba!  ****************************/
 			/* Adição da nova transição do novo incial pro novo final do vetor aux */
@@ -821,7 +837,7 @@ public class ConversionER {
 			newState.setUnionStart(conversion.statesList.get(positionStart).isUnionStart());
 			newState.setUnionEnd(conversion.statesList.get(positionStart).isUnionEnd());
 			auxStateList.add(newState);
-			
+
 			/**************************** PASSO 3 da União - Recortar ****************************/
 			/**************************** Recorta do vetor principal para o auxiliar  ****************************/
 			while(control) {
@@ -837,36 +853,36 @@ public class ConversionER {
 					conversion.statesList.remove(insideUnionPosition);
 				}
 			}
-			
+
 			/**************************** PASSO 4 da União - Redistribuir as ligações menores pro inicial ****************************/
 			/**************************** Passa as ligações adiante  ****************************/
 			for (int i = 0; i < auxStateList.get(0).getNextState().size(); i++) {
 				for (int j = 0; j < auxStateList.get(1).getNextState().size(); j++) {
 					if (auxStateList.get(0).getNextState().get(i).getName() != auxStateList.get(1).getNextState().get(j).getName() 
 							&& (auxStateList.get(0).getNextState().get(i).getName() < auxStateList.get(2).getName())) {
-						
+
 						auxStateList.get(0).getNextState().add(new State(auxStateList.get(1).getNextState().get(j).getName()));
 						auxStateList.get(0).getItemToChange().add(auxStateList.get(1).getItemToChange().get(j));
-						
+
 						auxStateList.get(1).getNextState().remove(j);
 						auxStateList.get(1).getItemToChange().remove(j);
-						
+
 					}
 				}
 			}
-			
+
 			/* Adciona estado final e linka o antigo final para ele */
 			auxStateList.set(auxStateList.size()-1, logicState.swapFinalLink((auxStateList.get(auxStateList.size()-1)), 
-																				'L', 
-																				auxStateList.get(auxStateList.size()-1).getName()+1)
-																				);
+					'L', 
+					auxStateList.get(auxStateList.size()-1).getName()+1)
+					);
 			/* Adiciona o estado final */
 			newState = new State((auxStateList.get(auxStateList.size()-1).getName()+1),
-								"F", 
-								new State(-1)
-								);
+					"F", 
+					new State(-1)
+					);
 			auxStateList.add(newState);
-			
+
 			/**************************** PASSO 5 a União - Renomear ****************************/
 			/**************************** Renomeia a pora toda do vetor principal para o auxiliar  ****************************/
 			/* Troco os nomes */
@@ -882,13 +898,13 @@ public class ConversionER {
 					}
 				}
 			}
-			
+
 			/* Limpeza */
 			for (int i = 0; i < auxStateList.size(); i++) {
 				if (i==0) {
 					auxStateList.get(i).setChainStart(true);
 				}
-				
+
 				else if(i==auxStateList.size()-1) {
 					auxStateList.get(i).setChainStart(false);
 					auxStateList.get(i).setUnionStart(false);
@@ -902,11 +918,11 @@ public class ConversionER {
 					auxStateList.get(i).setUnionEnd(false);
 				}
 			}
-			
+
 			/* Linka o estado final para o antigo inicial */
 			auxStateList.get(auxStateList.size()-1).getNextState().add(new State(auxStateList.get(1).getName()));
 			auxStateList.get(auxStateList.size()-1).getItemToChange().add("L");
-			
+
 			/**************************** PASSO 5 do Kleene - Linkar o CS com o CE ****************************/
 			/**************************** Linka lá no fim saporra  ****************************/
 			/* Adição da nova transição do novo incial pro novo final do vetor aux */
@@ -918,7 +934,7 @@ public class ConversionER {
 					hasLink = true;
 				}
 			}
-			
+
 			/**************************** PASSO 6 do Kleene - Linkar o último elemento com o UnionEnd ****************************/
 			/**************************** Linka lá no fim da união de riba!  ****************************/
 			/* Adição da nova transição do novo incial pro novo final do vetor aux */
@@ -928,67 +944,66 @@ public class ConversionER {
 				auxStateList.get(0).addItemtoChange("L");
 			}
 		}
-		
+
 		/**************************** PASSO 6 do Kleene - Fuuuusão HA ****************************/
 		/**************************** Funde o auxiliar com o principal  ****************************/
 		/* Adição do vetor auxiliar no original */
 		conversion.statesList.addAll(auxStateList);
-		
+
 		return conversion;
 	}
-	
+
 	public ConversionER foundRightParenthesis(ConversionER conversion) {
 		System.out.println("ENTREI NO IF COM a lista de tamanho "+conversion.statesList.size());
 		System.out.println("Entrei com o custo do primeiro elemento sendo " + conversion.statesList.get(0).getItemToChange().get(0));
-		
+
 		if (conversion.statesList.size() > 0 && conversion.statesList.get(0).isUnionStart()) {
-			
+
 			int startPosition = conversion.statesList.size()-1;
 			//int endPosition = 0;
-			
+
 			for (int j = 0; j < conversion.statesList.size(); j++) {
 				System.out.println("ESTOU RODANDO O ELEMENTO Q"+conversion.statesList.get(j).getName());
 				if (conversion.statesList.get(j).isChainStart() && (conversion.statesList.get(j).getName() < conversion.statesList.get(startPosition).getName())) {
 					startPosition = j;
 				}
-				
+
 				else if(conversion.statesList.get(j).isChainStart()){
 					conversion.statesList.get(j).setChainStart(false);
 				}
-				
+
 				else if(conversion.statesList.get(j).isUnionEnd() && (j == conversion.statesList.size()-1)) {
 					//endPosition = j;
 					conversion.statesList.get(j).setChainEnd(true);
 				}
-				
+
 				else if(conversion.statesList.get(j).isUnionEnd()){
 					conversion.statesList.get(j).setChainEnd(false);
 				}
-				
+
 				else if(conversion.statesList.get(j).isChainEnd()) {
 					conversion.statesList.get(j).setChainEnd(false);
 				}
 			}
-			
+
 			if (startPosition > 0 && startPosition != conversion.statesList.size()) {
 				conversion.statesList.get(startPosition-1).setChainStart(true);
 				conversion.statesList.get(startPosition).setChainStart(false);
 			}
-			
+
 			/*if (endPosition > 0) {
 				mainList.statesList.get(endPosition).setChainEnd(true);
 			}*/
-			
+
 			conversion.statesList.get(conversion.statesList.size()-1).setInsideUnion(true);
 		}
-		
+
 		return conversion;
 	}
-	
-	/* mudar para q0 */
+
 	public ArrayList<State> setInitialOrEnd(ArrayList<State> states) {
 		states.get(0).setInicial(true);
-		
+
 		for (int i = 0; i < states.size(); i++) {
 			for (int j = 0; j < states.get(i).getNextState().size(); j++) {
 				if (states.get(i).getNextStateName(j) == -1) {
@@ -997,10 +1012,10 @@ public class ConversionER {
 				}
 			}
 		}
-		
+
 		return states;
 	}
-	
+
 	public void printTudo(ArrayList<State> auxStateList) {
 		System.out.println();
 		System.out.println("VOU IMPRIMIR O AUXILIAR PRA SABER DO ROLE!");
@@ -1010,7 +1025,7 @@ public class ConversionER {
 		System.out.println("IMPRIMI O AUXILIAR PRA SABER DO ROLE!");
 		System.out.println();
 	}
-	
+
 	public int getLastState() {
 		return this.statesList.size()-1;
 	}
@@ -1018,7 +1033,7 @@ public class ConversionER {
 	public ArrayList<State> fixUnionStartAndEnd(ArrayList<State> stateList){
 		int smallStart = stateList.size()-1;
 		int biggestEnd = 0;
-		
+
 		for (int i = 0; i < stateList.size(); i++) {
 			if (stateList.get(i).isUnionStart() && (stateList.get(i).getName() < stateList.get(smallStart).getName())) {
 				smallStart = i;
@@ -1034,22 +1049,25 @@ public class ConversionER {
 				biggestEnd = i;
 			}
 		}
-		
+
 		return stateList;
 	}
 
+	/* FORMATAR AQUI - NÃO ESQUECER */
 	public void writeGraphviz(ConversionER conversion) {
 		FileWriter arquivo;
-		
+
 		for (int i = 0; i < conversion.statesList.size(); i++) {
 			for (int j = 0; j < conversion.statesList.get(i).getItemToChange().size(); j++) {
 				try {
-					
+
 					arquivo = new FileWriter(new File("imprimirAbagacaDeCompiladores.dot"),true);
-					arquivo.write("q"+conversion.statesList.get(i).getName() + " -" + 
-							conversion.statesList.get(i).getItemToChange().get(j) + "> " + 
-							"q"+conversion.statesList.get(i).getNextState().get(j).getName() + ""  );
-					
+					arquivo.write("q"+conversion.statesList.get(i).getName() + " -> " + 
+							"q"+conversion.statesList.get(i).getNextState().get(j).getName() +
+							"[label=\"" +
+							conversion.statesList.get(i).getItemToChange().get(j) +
+							"\"];\n"  );
+
 					arquivo.close();
 				} catch (IOException e) {
 					e.printStackTrace();
@@ -1060,6 +1078,31 @@ public class ConversionER {
 
 			}
 		}
+	}
+
+	public ArrayList<State> parenthesisStartAndEnd(ArrayList<State> states){
+
+		for (int i = 0; i < states.size(); i++) {
+			for (int j = 0; j < states.get(i).getNextState().size(); j++) {
+				
+				if (states.get(i).getNextStateName(j) == -1) {
+					states.get(i).setLeftStart(false);
+					states.get(i).setRightEnd(true);
+				}
+				
+				else if (i == 0) {
+					states.get(i).setLeftStart(true);
+					states.get(i).setRightEnd(false);
+				}
+
+				else {
+					states.get(i).setLeftStart(false);
+					states.get(i).setRightEnd(false);
+				}
+			}
+		}
+
+		return states;
 	}
 }
 

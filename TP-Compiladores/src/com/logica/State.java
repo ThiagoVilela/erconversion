@@ -20,6 +20,25 @@ public class State {
 	private boolean unionEnd = false;
 	
 	private boolean insideUnion = false;
+	
+	private boolean leftStart = false;
+	private boolean rightEnd = false;
+
+	public boolean isLeftStart() {
+		return leftStart;
+	}
+
+	public void setLeftStart(boolean leftStart) {
+		this.leftStart = leftStart;
+	}
+
+	public boolean isRightEnd() {
+		return rightEnd;
+	}
+
+	public void setRightEnd(boolean rightEnd) {
+		this.rightEnd = rightEnd;
+	}
 
 	/* Construtores */
 	public State() {
