@@ -68,7 +68,17 @@ public class ConversionAFND {
 			for (int i = 0; i < conversion.statesList.size(); i++) {
 				conversion.statesList.get(i).printState();
 			}
-
+			
+			for (int i = 0; i < conversion.statesList.size(); i++) {
+				for (int j = 0; j < conversion.statesList.get(i).getNextState().size(); j++) {
+					for (int j2 = 0; j2 < conversion.statesList.get(i).getNextState().size(); j2++) {
+						if (conversion.statesList.get(i).getNextState().get(j).getName() == conversion.statesList.get(i).getNextState().get(j2).getName() && j!=j2) {
+							conversion.statesList.get(i).getNextState().remove(j);
+						}
+					}
+					
+				}
+			}
 			System.out.println("===================AFD=======================");
 			conversion.statesList = conversionAFND.afn2afd(conversion.statesList);
 			for (int i = 0; i < conversion.statesList.size(); i++) {
@@ -86,45 +96,45 @@ public class ConversionAFND {
 	public ArrayList<State> removeLambda(int i, int j, int passState, ArrayList<State> stateList){
 		System.out.println("Entrei no método");
 		//Percorre a lista de nextState do elemento a passar suas transições
-		for (int k = 0; k < stateList.get(passState).getNextState().size(); k++) {
-
-			/*System.out.println(stateList.get(i).getNextState().get(j).getName());
-			System.out.println(stateList.get(passState).getNextState().get(k).getName());
-			System.out.println(stateList.get(i).getNextState().get(j).getName()!=stateList.get(passState).getNextState().get(k).getName());
-			System.out.println(stateList.get(i).getItemToChange().get(j));
-			System.out.println(stateList.get(passState).getItemToChange().get(k));
-			System.out.println(!stateList.get(i).getItemToChange().get(j).equals(stateList.get(passState).getItemToChange().get(k)));*/
+		for (int k = 0; k < stateList.size(); k++) {
 			
 			System.out.println("q"+stateList.get(i).getNextState().get(j).getName() + " == q" + stateList.get(k).getName() + "?");
 			System.out.println("O valor de k é: " + k);
+			System.out.println();
+			
 			if (stateList.get(i).getNextState().get(j).getName() == stateList.get(k).getName()) {
 				
-				System.out.println("ENCONTREI UM ELEMENTO q"+ stateList.get(i).getNextState().get(j).getName() + "Que é igual a q" + stateList.get(k).getName());
+				System.out.println("ENCONTREI UM ELEMENTO q"+ stateList.get(i).getNextState().get(j).getName() + " Que é igual a q" + stateList.get(k).getName());
 				
 				/* Buscar a lista de nextState do Elemento X selecionado */
 				for (int l = 0; l < stateList.get(k).getNextState().size(); l++) {
+					System.out.println("q" + stateList.get(i).getNextState().get(j).getName() + " == q" + stateList.get(k).getNextState().get(l).getName() + "?");
+					System.out.println(stateList.get(i).getItemToChange().get(j) + " equals " + stateList.get(k).getItemToChange().get(l));
+					
 					if (stateList.get(i).getNextState().get(j).getName() == stateList.get(k).getNextState().get(l).getName() &&
 							stateList.get(i).getItemToChange().get(j).equals(stateList.get(k).getItemToChange().get(l))) {
 						//Do nothing - João das Neves
+						System.out.println("ACHEI UM LELEMENTO DUPLICADO");
 					}
-					else if(stateList.get(i).getNextState().get(j).getName() == stateList.get(k).getNextState().get(l).getName()) {
+					else if(stateList.get(i).getNextState().get(j).getName() != stateList.get(k).getNextState().get(l).getName()){
+						System.out.println("ACHEI UM ELEMENTO QUE EU AINDA NAO TENHO!");
 						stateList.get(i).getNextState().add(new State(stateList.get(k).getNextState().get(l).getName()));
 						stateList.get(i).getItemToChange().add(stateList.get(k).getItemToChange().get(l));
+						
+						System.out.println("VOU IMPRIMIR O ELEMENTO");
+						stateList.get(i).printState();
 					}
 				}
 				
 			}
-			/* Buscar o elemento com o nome do nextState J do elemento I selecionado*/
-			/*for (int x = 0; x < stateList.size(); x++) {
-				System.out.println("ENTREI NO FOR DO X");
-				
-				
-			}*/
 		}
-
+		
+		
 		stateList.get(i).getNextState().remove(j);
 		stateList.get(i).getItemToChange().remove(j);
 
+		System.out.println("VOU SAIR!");
+		
 		return stateList;
 
 	}
