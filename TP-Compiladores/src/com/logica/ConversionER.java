@@ -587,16 +587,10 @@ public class ConversionER {
 		
 		/* Seto os nomes do aux para depois do último estado do main */
 		for (int i = 0; i < auxState.size(); i++) {
-			System.out.println("VOU AUMENTAR O ESTADO");
-			auxState.get(i).printState();
 			auxState.get(i).setName(i+mainState.size());
-			System.out.println("AUMENTEI O ESTADO");
-			auxState.get(i).printState();
 			for (int j = 0; j < auxState.get(i).getNextState().size(); j++) {
-				System.out.println(auxState.get(i).getNextState().get(j).getName() + "!= " + mainState.get(positionEnd).getName() + "?");
 				if (auxState.get(i).getNextState().get(j).getName() != mainState.get(positionEnd).getName()) {
 					auxState.get(i).getNextState().get(j).setName(auxState.get(i).getNextState().get(j).getName()+mainState.size());
-					auxState.get(i).printState();
 				}
 			}
 		}
