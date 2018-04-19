@@ -565,17 +565,26 @@ public class ConversionER {
 	
 	public ArrayList<State> linkPostUnion(ArrayList<State> auxState, ArrayList<State> mainState) {
 		//State newState = new State();
-		State logicState = new State();
+		//State logicState = new State();
 		ConversionER logicConversion = new ConversionER();
 		
 		int positionEnd = logicConversion.getEndParenthesisPosition(mainState);
 		int positionEndAux = logicConversion.getEndParenthesisPosition(auxState);
-
+		
 		/* Linko o chainEnd no novo estado */
-		auxState.set(positionEndAux, logicState.swapFinalLink((auxState.get(auxState.size()-1)), 
+		/*auxState.set(positionEndAux, logicState.swapFinalLink((auxState.get(auxState.size()-1)), 
 														'L', 
 														mainState.get(positionEnd).getName())
-														);
+														);*/
+		
+		for (int i = 0; i < auxState.get(positionEndAux).getNextState().size(); i++) {
+			if (auxState.get(positionEndAux).getItemToChange().get(i) == "F" && auxState.get(positionEndAux).getNextState().get(i).getName() == -1){
+				auxState.get(positionEndAux).getTransition().set(i, Character.toString('L'));
+				auxState.get(positionEndAux).getNextState().get(i).setName(mainState.get(positionEnd).getName());
+				i = auxState.get(positionEndAux).getNextState().size();
+			}
+		}
+		
 		/* Seto os nomes do aux para depois do último estado do main */
 		for (int i = 0; i < auxState.size(); i++) {
 			System.out.println("VOU AUMENTAR O ESTADO");
