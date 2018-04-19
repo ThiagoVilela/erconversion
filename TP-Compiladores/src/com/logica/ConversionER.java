@@ -152,6 +152,10 @@ public class ConversionER {
 				if (mainList.statesList.get(mainList.getLastState()).isRightEnd()) {
 					mainList = mainList.parenthesisUnion(mainList);
 				}
+				else if((mainList.statesList.get(mainList.getEndParenthesisPosition(mainList.statesList)).getName() < mainList.statesList.get(mainList.getLastState()).getName())
+						&& mainList.statesList.get(mainList.getEndParenthesisPosition(mainList.statesList)).isUnionEnd()) {
+					mainList = mainList.parenthesisUnion(mainList);
+				}
 				else {
 					mainList = mainList.foundUnion(mainList, i, expression);
 				}
@@ -188,6 +192,10 @@ public class ConversionER {
 				
 				/* Funde as duas listas */
 				mainList.statesList.addAll(auxStateList);
+				System.out.println("O TAMANHO DO MEU VETOR É DE " + mainList.statesList.size() + " POSICOES");
+				
+				/* Ajusto as marcações de parênteses */
+				mainList.statesList = mainList.parenthesisStartAndEnd(mainList.statesList);
 
 				/* Seta i com a posição da palavra em que foi terminada a lógica de recursão */
 				for (int k = i+1; k < expression.length(); k++) {
@@ -1141,6 +1149,27 @@ public class ConversionER {
 		System.out.println();
 		System.out.println("VOU IMPRIMIR O AUXILIAR PRA SABER DO ROLE!");
 		for (int j = 0; j < auxStateList.size(); j++) {
+			if (auxStateList.get(j).isChainStart()) {
+				System.out.println("ESSE EMBAIXO E CHAIN START!");
+			} 
+			if (auxStateList.get(j).isChainEnd()) {
+				System.out.println("ESSE EMBAIXO E CHAIN END!");
+			}  
+			if (auxStateList.get(j).isUnionStart()) {
+				System.out.println("ESSE EMBAIXO E UNION START!");
+			}  
+			if (auxStateList.get(j).isUnionEnd()) {
+				System.out.println("ESSE EMBAIXO E UNION END!");
+			} 	
+			if (auxStateList.get(j).isInsideUnion()) {
+				System.out.println("ESSE EMBAIXO E INSIDE UNION!");
+			} 
+			if (auxStateList.get(j).isLeftStart()) {
+				System.out.println("ESSE EMBAIXO E POS PARENTESE ESQUERDO");
+			}
+			if (auxStateList.get(j).isRightEnd()) {
+				System.out.println("ESSE EMBAIXO E PRE PARENTESE DIREITO");
+			}
 			auxStateList.get(j).printState();
 		}
 		System.out.println("IMPRIMI O AUXILIAR PRA SABER DO ROLE!");
@@ -1203,18 +1232,28 @@ public class ConversionER {
 		for (int i = 0; i < states.size(); i++) {
 			for (int j = 0; j < states.get(i).getNextState().size(); j++) {
 				
-				if (states.get(i).getNextStateName(j) == -1) {
-					states.get(i).setLeftStart(false);
-					states.get(i).setRightEnd(true);
-				}
-				
-				else if (i == 0) {
+				if (i == 0) {
+					states.get(i).printState();
 					states.get(i).setLeftStart(true);
 					states.get(i).setRightEnd(false);
 				}
 
 				else {
 					states.get(i).setLeftStart(false);
+					states.get(i).setRightEnd(false);
+				}
+			}
+		}
+		
+		boolean foundBiggestOne = false;
+		for (int i = states.size()-1; i >= 0 ; i--) {
+			for (int j = 0; j < states.get(i).getNextState().size(); j++) {
+				if (states.get(i).getNextState().get(j).getName() == -1 && !foundBiggestOne) {
+					states.get(i).setLeftStart(false);
+					states.get(i).setRightEnd(true);
+					foundBiggestOne = true;
+				}
+				else {
 					states.get(i).setRightEnd(false);
 				}
 			}
