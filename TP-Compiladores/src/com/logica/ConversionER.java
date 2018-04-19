@@ -1,6 +1,5 @@
 package com.logica;
 
-
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -74,9 +73,9 @@ public class ConversionER {
 				if (mainList.statesList.size() == 0) {
 					/* Crio o estado inicial */
 					newState = new State(0,
-							Character.toString(expression.charAt(i)), 
-							new State((1))
-							);
+										Character.toString(expression.charAt(i)), 
+										new State((1))
+										);
 					newState.setChainStart(true);
 					mainList.statesList.add(newState);
 
@@ -190,7 +189,7 @@ public class ConversionER {
 				
 				
 				if (mainList.statesList.size() > 0) {
-					int endPosition = mainList.getEndParenthesisPosition(mainList.statesList);
+					//int endPosition = mainList.getEndParenthesisPosition(mainList.statesList);
 
 					/* Verifico se o último elemento da lista é fim de parentese e fim de união*/
 					if ((mainList.statesList.get(mainList.getLastState()).isRightEnd() && mainList.statesList.get(mainList.getLastState()).isUnionEnd())
@@ -587,8 +586,6 @@ public class ConversionER {
 		int positionEnd = logicConversion.getEndParenthesisPosition(mainState);
 		int positionEndAux = logicConversion.getEndParenthesisPosition(auxState);
 		
-		logicConversion.printTudo(auxState);
-		
 		/* Linko o chainEnd no novo estado */
 		/*auxState.set(positionEndAux, logicState.swapFinalLink((auxState.get(auxState.size()-1)), 
 														'L', 
@@ -602,8 +599,6 @@ public class ConversionER {
 				i = auxState.get(positionEndAux).getNextState().size();
 			}
 		}
-		
-		logicConversion.printTudo(auxState);
 		
 		/* Seto os nomes do aux para depois do último estado do main */
 		for (int i = 0; i < auxState.size(); i++) {
@@ -622,8 +617,6 @@ public class ConversionER {
 				}
 			}
 		}
-		
-		logicConversion.printTudo(auxState);
 		
 		return auxState;
 	}

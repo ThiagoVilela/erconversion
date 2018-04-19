@@ -14,7 +14,7 @@ public class Read {
 		/* Fim Teste de entrada via teclado */
 		
 		if(objeto.validSentence(entrada)) {
-			System.out.println("Sentença Válida");
+			//System.out.println("Sentença Válida");
 		}else {
 			System.out.println("Sentença Inválida");
 		}
@@ -49,7 +49,7 @@ public class Read {
 		for (int i = 0; i < entrada.length(); i++) {
 
 			if(this.isLetterLower(entrada.charAt(i))) {
-				System.out.println("Show - Letra Minúscula");
+				////System.out.println("Show - Letra Minúscula");
 			}
 			
 			else if(this.isLetterUpper(entrada.charAt(i))) {
@@ -57,18 +57,18 @@ public class Read {
 					if(this.validPreview(i) && this.validNext(i, entrada.length())) {
 						if((this.isLetterLower(entrada.charAt(i-1)) || (entrada.charAt(i-1) == ')') || (entrada.charAt(i-1) == '*')) 
 								&& ((this.isLetterLower(entrada.charAt(i+1))) || (entrada.charAt(i+1) == '('))) {
-							System.out.println("Show - Letra Maiúscula");
+							//System.out.println("Show - Letra Maiúscula");
 						}else {
-							System.out.println("Erro - Letra Maiúscula (anterior ou posterior inválido)");
+							//System.out.println("Erro - Letra Maiúscula (anterior ou posterior inválido)");
 							return false;
 						}
 					} else {
-						System.out.println("Erro - letra maiúscula (não tem anterior ou posterior)");
+						//System.out.println("Erro - letra maiúscula (não tem anterior ou posterior)");
 						return false;
 					}
-					//System.out.println("Show nos sinais reservados");
+					////System.out.println("Show nos sinais reservados");
 				}else {
-					System.out.println("Erro - letra maiúscula (não é reservada)");
+					//System.out.println("Erro - letra maiúscula (não é reservada)");
 					return false;
 				}
 			}
@@ -79,7 +79,7 @@ public class Read {
 			
 			else if(entrada.charAt(i) == ')') {
 				if (parenthesisStack-1 < 0) {
-					System.out.println("Erro - Parentese Direito");
+					//System.out.println("Erro - Parentese Direito");
 					return false;
 				}
 				else {
@@ -90,13 +90,13 @@ public class Read {
 			else if(entrada.charAt(i) == '*') {
 				if(this.validPreview(i)) {
 					if((this.isLetterLower(entrada.charAt(i-1))) || (entrada.charAt(i-1) == ')')) {
-						System.out.println("Show - Klene!");
+						//System.out.println("Show - Klene!");
 					}else {
-						System.out.println("Erro - Klene");
+						//System.out.println("Erro - Klene");
 						return false;
 					}
 				} else {
-					System.out.println("Erro - Klene");
+					//System.out.println("Erro - Klene");
 					return false;
 				}
 			}
@@ -104,27 +104,27 @@ public class Read {
 			else if(entrada.charAt(i) == '+') {
 				if(this.validPreview(i)) {
 					if(this.isLetterLower(entrada.charAt(i-1)) || (entrada.charAt(i-1) == ')')) {
-						System.out.println("Show - Klene positivo!");
+						//System.out.println("Show - Klene positivo!");
 					}else {
-						System.out.println("Erro - Klene positivo");
+						//System.out.println("Erro - Klene positivo");
 						return false;
 					}
 				} else {
-					System.out.println("Erro - Klene positivo");
+					//System.out.println("Erro - Klene positivo");
 					return false;
 				}
 			}
 			
 			else {
-				System.out.println("Erro - Caractere Inválido");
+				//System.out.println("Erro - Caractere Inválido");
 				return false;
 			}
 		}
 		
 		if(parenthesisStack == 0) {
-			System.out.println("Leitura de paretenses válida.");
+			//System.out.println("Leitura de paretenses válida.");
 		}else {
-			System.out.println("Erro nos parenteses");
+			//System.out.println("Erro nos parenteses");
 			return false;
 		}
 		
