@@ -146,6 +146,7 @@ public class ConversionER {
 			else if(expression.charAt(i) == 'U') {
 				/****************************************************** PASSO3 - 'aU' ADD FIM INICIO ******************************************************/
 				if (mainList.statesList.get(mainList.getLastState()).isRightEnd()) {
+					System.out.println("ENTREI NO IF 1 DO U!");
 					mainList = mainList.parenthesisUnion(mainList);
 				}
 				
@@ -187,15 +188,26 @@ public class ConversionER {
 				/* Marco os estados iniciais e finais pós operação em um parêntese */
 				auxStateList = mainList.parenthesisStartAndEnd(auxStateList);
 				
+				
 				if (mainList.statesList.size() > 0) {
+					int endPosition = mainList.getEndParenthesisPosition(mainList.statesList);
+					System.out.println(endPosition);
 					/* Verifico se o último elemento da lista é fim de parentese e fim de união*/
 					if ((mainList.statesList.get(mainList.getLastState()).isRightEnd() && mainList.statesList.get(mainList.getLastState()).isUnionEnd())
 							&&
 						(mainList.statesList.get(0).isLeftStart() && mainList.statesList.get(0).isUnionStart())) {
-						
 						/* Linko o último elemento do aux no ultimo do main*/
 						auxStateList = mainList.linkPostUnion(auxStateList, mainList.statesList);
 						
+						/* Linko o primeiro do main no primeiro do aux */
+						mainList.statesList.get(0).addItemtoChange("L");
+						mainList.statesList.get(0).addNextState(new State(auxStateList.get(0).getName()));
+					}
+					
+					else if(auxStateList.get(0).getName() < mainList.statesList.get(mainList.getLastState()).getName()) {
+						mainList.statesList = mainList.parenthesisStartAndEnd(mainList.statesList);
+						auxStateList = mainList.linkPostUnion(auxStateList, mainList.statesList);
+
 						/* Linko o primeiro do main no primeiro do aux */
 						mainList.statesList.get(0).addItemtoChange("L");
 						mainList.statesList.get(0).addNextState(new State(auxStateList.get(0).getName()));
