@@ -191,11 +191,12 @@ public class ConversionER {
 				
 				if (mainList.statesList.size() > 0) {
 					int endPosition = mainList.getEndParenthesisPosition(mainList.statesList);
-					System.out.println(endPosition);
+
 					/* Verifico se o último elemento da lista é fim de parentese e fim de união*/
 					if ((mainList.statesList.get(mainList.getLastState()).isRightEnd() && mainList.statesList.get(mainList.getLastState()).isUnionEnd())
 							&&
 						(mainList.statesList.get(0).isLeftStart() && mainList.statesList.get(0).isUnionStart())) {
+
 						/* Linko o último elemento do aux no ultimo do main*/
 						auxStateList = mainList.linkPostUnion(auxStateList, mainList.statesList);
 						
@@ -205,7 +206,10 @@ public class ConversionER {
 					}
 					
 					else if(auxStateList.get(0).getName() < mainList.statesList.get(mainList.getLastState()).getName()) {
+
+						/* Seto os limites para conseguir linkar os elementos flutuantes */
 						mainList.statesList = mainList.parenthesisStartAndEnd(mainList.statesList);
+						
 						auxStateList = mainList.linkPostUnion(auxStateList, mainList.statesList);
 
 						/* Linko o primeiro do main no primeiro do aux */
@@ -577,18 +581,20 @@ public class ConversionER {
 	
 	public ArrayList<State> linkPostUnion(ArrayList<State> auxState, ArrayList<State> mainState) {
 		//State newState = new State();
-		//State logicState = new State();
+		State logicState = new State();
 		ConversionER logicConversion = new ConversionER();
 		
 		int positionEnd = logicConversion.getEndParenthesisPosition(mainState);
 		int positionEndAux = logicConversion.getEndParenthesisPosition(auxState);
+		
+		logicConversion.printTudo(auxState);
 		
 		/* Linko o chainEnd no novo estado */
 		/*auxState.set(positionEndAux, logicState.swapFinalLink((auxState.get(auxState.size()-1)), 
 														'L', 
 														mainState.get(positionEnd).getName())
 														);*/
-		
+		/* Faço swap manualmente */
 		for (int i = 0; i < auxState.get(positionEndAux).getNextState().size(); i++) {
 			if (auxState.get(positionEndAux).getItemToChange().get(i) == "F" && auxState.get(positionEndAux).getNextState().get(i).getName() == -1){
 				auxState.get(positionEndAux).getTransition().set(i, Character.toString('L'));
@@ -597,15 +603,27 @@ public class ConversionER {
 			}
 		}
 		
+		logicConversion.printTudo(auxState);
+		
 		/* Seto os nomes do aux para depois do último estado do main */
 		for (int i = 0; i < auxState.size(); i++) {
 			auxState.get(i).setName(i+mainState.size());
+			
+		}
+		for (int i = 0; i < auxState.size(); i++) {
 			for (int j = 0; j < auxState.get(i).getNextState().size(); j++) {
 				if (auxState.get(i).getNextState().get(j).getName() != mainState.get(positionEnd).getName()) {
 					auxState.get(i).getNextState().get(j).setName(auxState.get(i).getNextState().get(j).getName()+mainState.size());
 				}
+				else if(auxState.get(i).getNextState().get(j).getName() == mainState.get(positionEnd).getName() && 
+						auxState.get(i).getName() != auxState.get(logicConversion.getEndParenthesisPosition(auxState)).getName()) {
+					int newName = logicState.findChainEnd(auxState);
+					auxState.get(i).getNextState().get(j).setName(auxState.get(newName).getName());
+				}
 			}
 		}
+		
+		logicConversion.printTudo(auxState);
 		
 		return auxState;
 	}
